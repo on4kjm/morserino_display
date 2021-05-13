@@ -1,5 +1,5 @@
 /*
-Copyright © 2021 ON4KJM
+Copyright © 2021 Jean-Marc Meessen, ON4KJM <on4kjm@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -35,13 +35,10 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "morserino_display",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Displays the output of a Morserino on a larger screen.",
+	Long: `This tool allows to mirror the small Morserino-32 display on the screen of USB connected PC.
+For easy reading, a new line is inserted after a "=" sign. 
+`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
