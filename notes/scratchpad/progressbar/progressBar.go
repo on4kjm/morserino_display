@@ -1,0 +1,29 @@
+package main
+
+import (
+	"fmt"
+	"strings"
+	"time"
+)
+
+func renderbar(count, total int) {
+	barwidth := 30
+	done := int(float64(barwidth) * float64(count) / float64(total))
+
+	fmt.Printf("Progress: \x1b[33m%3d%%\x1b[0m ", count*100/total)
+	fmt.Printf("[%s%s]",
+		strings.Repeat("=", done),
+		strings.Repeat("-", barwidth-done))
+}
+
+func main() {
+	total := 50
+	for i := 1; i <= total; i++ {
+		fmt.Print("\x1b7")   // save the cursor position
+		fmt.Print("\x1b[2k") // erase the current line
+		renderbar(i, total)
+		time.Sleep(50 * time.Millisecond)
+		fmt.Print("\x1b8") // restore the cursor position
+	}
+	fmt.Println()
+}
