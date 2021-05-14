@@ -1,0 +1,59 @@
+# This is an example goreleaser.yaml file with some sane defaults.
+# Make sure to check the documentation at http://goreleaser.com
+builds:
+- goos:
+  - linux
+  - windows
+  - darwin
+  goarch:
+  - 386
+  - amd64
+  - arm
+  - arm64
+  goarm:
+  - 6
+  ignore:
+    - goos: darwin
+      goarch: 386
+    - goos: windows
+      goarch: amd64
+  ldflags:
+    - -s -w -X morserino_display/cmd.version={{.Version}} -X morserino_display/cmd.commit={{.Commit}} -X morserino_display/cmd.date={{.Date}} -X=morserino_display/cmd.builtBy=goReleaser
+  env:
+  - CGO_ENABLED=0
+
+
+archives:
+- replacements:
+    amd64: 64-bit
+    386: 32-bit
+    darwin: macOS
+    linux: Linux
+  name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+  format_overrides:
+  - goos: windows
+    format: zip
+  # files:
+  #     - README.md
+  #     - doc/whats_new.md
+  #     - doc/usage.md
+  #     - doc/install.md
+  #     - doc/install_mac.md
+  #     - doc/pictures/Error_1.png
+  #     - doc/pictures/Error_2.png
+  #     - doc/pictures/security_setting.png
+  #     - doc/pictures/System_preference.png
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ .Tag }}-next"
+
+changelog:
+  skip: true
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
