@@ -30,7 +30,6 @@ func main() {
 	fmt.Print("4 ")
 	time.Sleep(2 * time.Second)
 	fmt.Print("\n")
-	
 
 	// It is conventional not to worry about any
 	// error returned by Print.

@@ -22,8 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
-
+	"morserino_display/morserino_com"
 	"github.com/spf13/cobra"
 )
 
@@ -34,7 +33,7 @@ var listCmd = &cobra.Command{
 	Long: `Displays the ports available on the system.
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("list called")
+		morserino_com.List_com()
 	},
 }
 

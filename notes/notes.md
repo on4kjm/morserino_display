@@ -10,7 +10,6 @@
 * https://github.com/chrissnell/tnc-server (outdated serial library)
 * https://github.com/tv42/topic
 * https://golang.hotexamples.com/examples/github.com.tarm.serial/Port/Read/golang-port-read-method-examples.html
-* https://pkg.go.dev/go.bug.st/serial.v1 
 * https://pkg.go.dev/go.bug.st/serial
 * Testing a serial port https://terinstock.com/post/2018/07/Black-box-Serial-Testing/
 * `screen /dev/tty.usbserial-0001 115200` also  Parity.None, 8, StopBits.One
@@ -26,3 +25,10 @@ See also [Create a CLI in golang with Cobra](https://codesource.io/create-a-cli-
 * `go mod tidy`
 * `go build`
 * `./morserino_display`
+
+* What is CGO ?
+  ```
+  This library tries to avoid the use of the "C" package (and consequently the need of cgo) to simplify cross compiling. Unfortunately the USB enumeration package for darwin (MacOSX) requires cgo to access the IOKit framework. This means that if you need USB enumeration on darwin you're forced to use cgo.
+  ```
+
+* https://github.com/goreleaser/goreleaser-action/issues/233
