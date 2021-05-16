@@ -32,3 +32,10 @@ See also [Create a CLI in golang with Cobra](https://codesource.io/create-a-cli-
   ```
 
 * https://github.com/goreleaser/goreleaser-action/issues/233
+
+## Mocking articles
+* [How to mock? Go Way.](https://medium.com/@ankur_anand/how-to-mock-in-your-go-golang-tests-b9eee7d7c266)
+* [GoMock vs. Testify: Mocking frameworks for Go](https://blog.codecentric.de/2019/07/gomock-vs-testify/)
+* [Writing Go Code with Visual Studio Code](https://medium.com/@mekilis/writing-go-code-with-visual-studio-code-6daa326cb6b8)
+* [How to mock an external service for tests in GO](https://wawand.co/blog/posts/how-to-mock-an-external-service-for-test-in-go-73251a7a/)
+* [Mocking dependencies in Go](https://dev.to/jonfriesen/mocking-dependencies-in-go-1h4d)

@@ -28,6 +28,7 @@ import (
 	"strings"
 
 	"go.bug.st/serial"
+	"morserino_display/pkg/morserino_console"
 )
 
 // Main listen function with display to the console
@@ -65,6 +66,8 @@ func Listen_console(morserinoPortName string) error {
 		log.Fatal(err)
 	}
 
+	consoleDisplay := morserino_console.ConsoleDisplay{}
+
 	buff := make([]byte, 100)
 	for {
 		// Reads up to 100 bytes
@@ -77,11 +80,7 @@ func Listen_console(morserinoPortName string) error {
 			break
 		}
 
-		if strings.Contains(string(buff[:n]), "=") {
-			fmt.Println("=")
-		} else {
-			fmt.Printf("%s", string(buff[:n]))
-		}
+		consoleDisplay.Add(string(buff[:n]))
 	}
 	return nil
 }
