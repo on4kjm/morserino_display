@@ -30,6 +30,7 @@ import (
 	"morserino_display/pkg/morserino_console"
 
 	"go.bug.st/serial"
+	"morserino_display/pkg/morserino_console"
 )
 
 // Main listen function with display to the console
