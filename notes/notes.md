@@ -47,3 +47,35 @@ See also [Create a CLI in golang with Cobra](https://codesource.io/create-a-cli-
 
 ## Miscelaneous
 * [Buy Me a Coffe badge](https://gist.github.com/gbraad/216f8162d9b382d14b8a097a37cc2c72#file-readme-md)
+* https://github.com/troian/golang-cross
+
+## Web interface
+* conversation sur Slack
+  * "je dirais "vanilla js" ce qui veut dire aucun framework, et requête ajax oui"
+  * si tu veux pas te prendre la tête je dirais ajax aussi
+  * https://www.w3schools.com/xml/ajax_intro.asp
+  * example
+    ```
+    const interval = window.setInterval(() => {callServer()}, 1000)
+    window.clearInterval(interval); quand il veut stop
+    function callServer(){
+    fetch('flowers.jpg')
+    .then(function(response) {
+      return response.blob();
+    })
+    .then(function(myBlob) {
+      const objectURL = URL.createObjectURL(myBlob);
+      myImage.src = objectURL;
+    });
+    }
+    ```
+  * https://developer.mozilla.org/fr/docs/Web/API/Fetch_API/Using_Fetch
+  * Lecture série -> go Channel -> websocket <- js
+* [WebSocket simple example / server in go, client in JS](https://gist.github.com/owulveryck/57d8c2469fd1f8a840747b064c50ff4e)
+* [Go: Asynchronous Real-Time Broadcasting using Channels and WebSockets](https://dev.to/danielkun/go-asynchronous-and-safe-real-time-broadcasting-using-channels-and-websockets-4g5d), 2018
+* [Simple Go-based HTTP streaming via HTTP and websockets.](https://gist.github.com/vmarmol/b967b29917a34d9307ce)
+* [HTTP Streaming in Golang](https://dmathieu.com/articles/development/golang-streaming/)
+* [Create a Single Page App With Go, Echo and Vue](https://scotch.io/tutorials/create-a-single-page-app-with-go-echo-and-vue)
+* [How to update the textbox value without page refresh using ajax in mvc](https://stackoverflow.com/questions/42396886/how-to-update-the-textbox-value-without-page-refresh-using-ajax-in-mvc)
+* [Using websockets in golang with gorilla-websocket](https://rogerwelin.github.io/golang/websockets/gorilla/2018/03/13/golang-websockets.html)
+* see Gorilla-websocket examples: https://github.com/gorilla/websocket/blob/master/examples/filewatch/main.go
