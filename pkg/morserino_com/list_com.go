@@ -56,8 +56,8 @@ type comPortList struct {
 
 // Gets the list of COM devices and displays them on the console
 func List_com() {
-	comList := get_com_list()
-	buffer := display_com_list(comList)
+	comList := Get_com_list()
+	buffer := prettyPrint_comList(comList)
 	for _, line := range buffer {
 		fmt.Println(line)
 	}
@@ -65,7 +65,7 @@ func List_com() {
 
 //Gets all the ports on the system , checks whether it is a moreserino,
 // and returns an array of port description
-func get_com_list() comPortList {
+func Get_com_list() comPortList {
 
 	var workComPortList comPortList
 	workComPortList.nbrOfPorts = 0
@@ -86,6 +86,7 @@ func get_com_list() comPortList {
 			wrkPortItem.usbVendorID = port.VID
 			wrkPortItem.usbProductID = port.PID
 			wrkPortItem.serialNumber = port.SerialNumber
+			//FIXME: Get the VID and PID of newer models
 			if (port.VID == "10C4") && (port.PID == "EA60") {
 				wrkPortItem.isMorserinoPort = true
 			}
@@ -100,13 +101,13 @@ func get_com_list() comPortList {
 	return workComPortList
 }
 
-func display_com_list(portList comPortList) []string {
+func prettyPrint_comList(portList comPortList) []string {
 	var buffer []string
 
-	if(portList.nbrOfPorts == 0){
+	if portList.nbrOfPorts == 0 {
 		buffer = append(buffer, "No ports found !")
 	}
-	if(portList.nbrOfMorserinoPorts > 1) {
+	if portList.nbrOfMorserinoPorts > 1 {
 		buffer = append(buffer, "WARNING: Multiple multiple Morserino devices detected")
 	}
 	buffer = append(buffer, "")

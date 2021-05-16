@@ -28,16 +28,17 @@ import (
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
+	// "morserino_display/pkg/morserino_com"
 )
 
 var cfgFile string
-var morserinoPortName = "auto"
+var morserinoPortName string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "morserino_display",
 	Short: "Displays the output of a Morserino on a larger screen.",
-	Long: `This tool allows to mirror the small Morserino-32 display on the screen of USB connected PC.
+	Long: `This tool allows to mirror the Morserino-32 display on the screen of USB connected PC.
 
 For easy reading, a new line is inserted after a "=" sign. 
 
@@ -45,6 +46,10 @@ For easy reading, a new line is inserted after a "=" sign.
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
+	// Run: func(cmd *cobra.Command, args []string) {
+	// 	//Displaying on console is de default behaviour
+	// 	morserino_com.Listen_console(morserinoPortName)
+	// },
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -60,7 +65,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&morserinoPortName, "port", "", "Morserino port (if set to \"auto\", will try to identify the port)")
+	rootCmd.PersistentFlags().StringVar(&morserinoPortName, "port", "auto", "Morserino port (if set to \"auto\", will try to identify the port)")
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.morserino_display.yaml)")
 

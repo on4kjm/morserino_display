@@ -22,8 +22,8 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"morserino_display/morserino_com"
 	"github.com/spf13/cobra"
+	"morserino_display/pkg/morserino_com"
 )
 
 // listCmd represents the list command
