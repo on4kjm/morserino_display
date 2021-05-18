@@ -79,3 +79,8 @@ See also [Create a CLI in golang with Cobra](https://codesource.io/create-a-cli-
 * [How to update the textbox value without page refresh using ajax in mvc](https://stackoverflow.com/questions/42396886/how-to-update-the-textbox-value-without-page-refresh-using-ajax-in-mvc)
 * [Using websockets in golang with gorilla-websocket](https://rogerwelin.github.io/golang/websockets/gorilla/2018/03/13/golang-websockets.html)
 * see Gorilla-websocket examples: https://github.com/gorilla/websocket/blob/master/examples/filewatch/main.go
+
+## Include fonts in CSS
+* https://stackoverflow.com/questions/24990554/how-to-include-a-font-ttf-using-css
+* https://www.pagecloud.com/blog/how-to-add-custom-fonts-to-any-website 
+* http://www.qth.net/pipermail/cw/2003-April/001133.html
