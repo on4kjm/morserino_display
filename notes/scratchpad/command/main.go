@@ -177,6 +177,7 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "home.html")
 }
 
+
 func main() {
 	flag.Parse()
 	if len(flag.Args()) < 1 {
@@ -188,6 +189,7 @@ func main() {
 		log.Fatal(err)
 	}
 	http.HandleFunc("/", serveHome)
+	http.Handle("/fonts/", http.StripPrefix("/fonts", http.FileServer(http.Dir("./fonts/"))))
 	http.HandleFunc("/ws", serveWs)
 	log.Fatal(http.ListenAndServe(*addr, nil))
 }

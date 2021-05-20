@@ -84,3 +84,8 @@ See also [Create a CLI in golang with Cobra](https://codesource.io/create-a-cli-
 * https://stackoverflow.com/questions/24990554/how-to-include-a-font-ttf-using-css
 * https://www.pagecloud.com/blog/how-to-add-custom-fonts-to-any-website 
 * http://www.qth.net/pipermail/cw/2003-April/001133.html
+  * https://www.fontsquirrel.com/tools/webfont-generator
+* Initial publication for MILL.ttf http://www.qth.net/pipermail/cw/2003-April/001133.html
+* https://stackoverflow.com/questions/26559557/how-do-you-serve-a-static-html-file-using-a-go-web-server
+* https://shakedos.com/serving-static-files-with-go
+* https://medium.com/rungo/beginners-guide-to-serving-files-using-http-servers-in-go-4e542e628eac
