@@ -89,3 +89,6 @@ See also [Create a CLI in golang with Cobra](https://codesource.io/create-a-cli-
 * https://stackoverflow.com/questions/26559557/how-do-you-serve-a-static-html-file-using-a-go-web-server
 * https://shakedos.com/serving-static-files-with-go
 * https://medium.com/rungo/beginners-guide-to-serving-files-using-http-servers-in-go-4e542e628eac
+* embedding files in code:
+  * https://golang.org/pkg/embed/
+  * https://blog.carlmjohnson.net/post/2021/how-to-use-go-embed/
