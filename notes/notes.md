@@ -79,6 +79,8 @@ See also [Create a CLI in golang with Cobra](https://codesource.io/create-a-cli-
 * [How to update the textbox value without page refresh using ajax in mvc](https://stackoverflow.com/questions/42396886/how-to-update-the-textbox-value-without-page-refresh-using-ajax-in-mvc)
 * [Using websockets in golang with gorilla-websocket](https://rogerwelin.github.io/golang/websockets/gorilla/2018/03/13/golang-websockets.html)
 * see Gorilla-websocket examples: https://github.com/gorilla/websocket/blob/master/examples/filewatch/main.go
+* gorilla websocket https://tutorialedge.net/golang/go-websocket-tutorial/
+* https://golangdocs.com/golang-gorilla-websockets 
 
 ## Include fonts in CSS
 * https://stackoverflow.com/questions/24990554/how-to-include-a-font-ttf-using-css
@@ -92,3 +94,19 @@ See also [Create a CLI in golang with Cobra](https://codesource.io/create-a-cli-
 * embedding files in code:
   * https://golang.org/pkg/embed/
   * https://blog.carlmjohnson.net/post/2021/how-to-use-go-embed/
+
+
+## websocket tutorial
+* https://tutorialedge.net/golang/building-realtime-youtube-sub-monitor-go/
+* https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer
+
+## Golang channels
+* https://medium.com/rungo/anatomy-of-channels-in-go-concurrency-in-go-1ec336086adb
+* [Golang handlefunc with channel](https://stackoverflow.com/questions/28419876/golang-handlefunc-with-channel)
+* [GO Websocket send all clients a message](https://stackoverflow.com/questions/31532652/go-websocket-send-all-clients-a-message)
+* [Part 4 - Handling Multiple Clients](https://tutorialedge.net/projects/chat-system-in-go-and-react/part-4-handling-multiple-clients/)
+
+## Update HTML
+* https://www.javascripttutorial.net/javascript-dom/javascript-createelement/
+* [JavaScript - How do I display a text, character by character](https://stackoverflow.com/questions/34370622/javascript-how-do-i-display-a-text-character-by-character)
+* [Append text to textarea with javascript](https://stackoverflow.com/questions/14444938/append-text-to-textarea-with-javascript/14445052)
