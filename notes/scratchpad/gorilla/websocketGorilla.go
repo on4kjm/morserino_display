@@ -20,10 +20,9 @@ var clients = make(map[*websocket.Conn]bool)
 var broadcast = make(chan *longLatStruct)
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
-		return true	
+		return true
 	},
 }
-
 
 func main() {
 	// 2
@@ -40,12 +39,10 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "home")
 }
 
-
 func writer(coord *longLatStruct) {
-	fmt.Printf("Sending data: %f - %f\n",coord.Lat,coord.Long)
+	fmt.Printf("Sending data: %f - %f\n", coord.Lat, coord.Long)
 	broadcast <- coord
 }
-
 
 func longLatHandler(w http.ResponseWriter, r *http.Request) {
 	var coordinates longLatStruct
@@ -59,31 +56,30 @@ func longLatHandler(w http.ResponseWriter, r *http.Request) {
 	go writer(&coordinates)
 }
 
-
 func wsHandler(w http.ResponseWriter, r *http.Request) {
-        ws, err := upgrader.Upgrade(w, r, nil)
-        if err != nil {
-                log.Fatal(err)
-        }
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-        // register client
-        clients[ws] = true	
+	// register client
+	clients[ws] = true
 }
 
 // 3
 func echo() {
-        for {
-                val := <-broadcast
-                latlong := fmt.Sprintf("%f %f", val.Lat, val.Long)
-                // send to every client that is currently connected
-                for client := range clients {
-                        err := client.WriteMessage(websocket.TextMessage, []byte(latlong))
-                        if err != nil {
-                                log.Printf("Websocket error: %s", err)
-                                client.Close()
-                                delete(clients, client)
-                        }
-						fmt.Print("Sending to client via websocket")
-                }
-        }
+	for {
+		val := <-broadcast
+		latlong := fmt.Sprintf("%f %f", val.Lat, val.Long)
+		// send to every client that is currently connected
+		for client := range clients {
+			err := client.WriteMessage(websocket.TextMessage, []byte(latlong))
+			if err != nil {
+				log.Printf("Websocket error: %s", err)
+				client.Close()
+				delete(clients, client)
+			}
+			fmt.Print("Sending to client via websocket")
+		}
+	}
 }

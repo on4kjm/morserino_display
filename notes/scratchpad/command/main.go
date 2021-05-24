@@ -177,7 +177,6 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "home.html")
 }
 
-
 func main() {
 	flag.Parse()
 	if len(flag.Args()) < 1 {

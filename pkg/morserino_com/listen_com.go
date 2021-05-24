@@ -53,12 +53,12 @@ func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator
 
 		if theComPortList.nbrOfMorserinoPorts == 0 {
 			fmt.Println("Didn't find a connected Morserino!")
-			return fmt.Errorf("Did not find a usable port.")
+			return nil, fmt.Errorf("Did not find a usable port.")
 		}
 
 		if theComPortList.nbrOfMorserinoPorts > 1 {
 			fmt.Println("ERROR: Multiple Morserino devices found.")
-			return fmt.Errorf("ERROR: Multiple Morserino devices found.")
+			return nil, fmt.Errorf("ERROR: Multiple Morserino devices found.")
 		}
 
 		morserinoPortName = theComPortList.morserinoPortName
@@ -67,6 +67,17 @@ func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator
 
 	fmt.Println("Listening to port \"" + morserinoPortName + "\"")
 	myPort, err := genericOpenComPort.Open(morserinoPortName, mode)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return myPort, nil
+}
+
+// Main listen function with display to the console
+func Listen_console(morserinoPortName string) error {
+
+	myPort, err := open_serialPort(morserinoPortName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -85,7 +96,7 @@ func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator
 			break
 		}
 
-		consoleDisplay.Add(string(buff[:n]))
+		consoleDisplay.Add(strings.ToUpper(string(buff[:n])))
 	}
 	return nil
 }

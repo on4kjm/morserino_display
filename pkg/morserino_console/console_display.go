@@ -30,7 +30,7 @@ import (
 //FIXME: Add comment
 type ConsoleDisplay struct {
 	currentLine string
-	newLine string
+	newLine     string
 }
 
 func (cd *ConsoleDisplay) String() string {
