@@ -36,7 +36,7 @@ var (
 	builtBy    = ""
 	versionCmd = &cobra.Command{
 		Use:   "version",
-		Short: "\"version\" will output the current build information",
+		Short: "Displays version information about the current executable",
 		Long:  ``,
 		Run: func(_ *cobra.Command, _ []string) {
 			var response string
