@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Command Example</title>
+<script type="text/javascript">
+window.onload = function () {
+    var conn;
+    // var msg = document.getElementById("msg");
+    var log = document.getElementById("log");
+
+
+    if (window["WebSocket"]) {
+        conn = new WebSocket("ws://localhost:8080/morserino");
+        conn.onclose = function (evt) {
+            var item = document.createElement("div");
+            item.innerHTML = "<b>Connection closed.</b>";
+            appendLog(item);
+        };
+        conn.onmessage = function (evt) {
+            var message = evt.data;
+            console.log("message: "+ message +".");
+            var messages = evt.data.split('\n');
+
+            for (var i = 0; i < messages.length; i++) {
+                if(i == 0) {
+                    var log = document.getElementById("log");
+                    var item = log.lastChild;
+                    if(!item) {
+                        item = document.createElement("div");
+                    }
+                    item.innerHTML += message; 
+                } else {
+                    var item = document.createElement("div");
+                    item.innerText = messages[i];
+                }
+                log.appendChild(item);
+                item.scrollIntoView();
+            }
+        };
+    } else {
+        var item = document.createElement("div");
+        item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+        appendLog(item);
+    }
+};
+</script>
+<style type="text/css">
+html {
+    overflow: hidden;
+}
+
+body {
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    background: gray;
+}
+
+#log {
+    background: white;
+    margin: 0;
+    padding: 0.5em 0.5em 0.5em 0.5em;
+    position: absolute;
+    /* font-family: telegraphers_millregular; */
+    top: 0.5em;
+    left: 0.5em;
+    right: 0.5em;
+    bottom: 0.5em;
+    overflow: auto;
+}
+
+#log pre {
+  margin: 0;
+}
+
+#form {
+    padding: 0 0.5em 0 0.5em;
+    margin: 0;
+    position: absolute;
+    bottom: 1em;
+    left: 0px;
+    width: 100%;
+    overflow: hidden;
+}
+
+/* @font-face {
+    font-family: 'telegraphers_millregular';
+    src: url('fonts/mill-webfont.woff2') format('woff2'),
+         url('fonts/mill-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+} */
+
+</style>
+</head>
+<body>
+<div id="log"></div>
+</body>
+</html>
