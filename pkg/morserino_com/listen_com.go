@@ -31,6 +31,22 @@ import (
 	"morserino_display/pkg/morserino_console"
 )
 
+var genericOpenComPort openComPortInterface
+
+func init() {
+	genericOpenComPort = openComPort{}
+}
+
+type openComPortInterface interface {
+	Open(portName string, mode *serial.Mode) (serial.Port, error)
+}
+
+type openComPort struct{}
+
+func (r openComPort) Open(portName string, mode *serial.Mode) (serial.Port, error) {
+	return serial.Open(portName, mode)
+}
+
 // Main listen function with display to the console
 func Listen_console(morserinoPortName string) error {
 
@@ -61,7 +77,7 @@ func Listen_console(morserinoPortName string) error {
 	}
 
 	fmt.Println("Listening to port \"" + morserinoPortName + "\"")
-	myPort, err := serial.Open(morserinoPortName, mode)
+	myPort, err := genericOpenComPort.Open(morserinoPortName, mode)
 	if err != nil {
 		log.Fatal(err)
 	}
