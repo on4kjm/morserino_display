@@ -39,3 +39,5 @@ See also [Create a CLI in golang with Cobra](https://codesource.io/create-a-cli-
 * [Writing Go Code with Visual Studio Code](https://medium.com/@mekilis/writing-go-code-with-visual-studio-code-6daa326cb6b8)
 * [How to mock an external service for tests in GO](https://wawand.co/blog/posts/how-to-mock-an-external-service-for-test-in-go-73251a7a/)
 * [Mocking dependencies in Go](https://dev.to/jonfriesen/mocking-dependencies-in-go-1h4d)
+* [How do I mock a function from another package without using dependency injection?](https://stackoverflow.com/questions/51428617/how-do-i-mock-a-function-from-another-package-without-using-dependency-injection)
+* [How to write mock for structs in Go](https://stackoverflow.com/questions/41053280/how-to-write-mock-for-structs-in-go)
