@@ -41,3 +41,9 @@ See also [Create a CLI in golang with Cobra](https://codesource.io/create-a-cli-
 * [Mocking dependencies in Go](https://dev.to/jonfriesen/mocking-dependencies-in-go-1h4d)
 * [How do I mock a function from another package without using dependency injection?](https://stackoverflow.com/questions/51428617/how-do-i-mock-a-function-from-another-package-without-using-dependency-injection)
 * [How to write mock for structs in Go](https://stackoverflow.com/questions/41053280/how-to-write-mock-for-structs-in-go)
+* [Improving Your Go Tests and Mocks With Testify](https://tutorialedge.net/golang/improving-your-tests-with-testify-go/)
+* [Mockery ](https://github.com/vektra/mockery)
+* [Mocking Techniques for Go](https://www.myhatchpad.com/insight/mocking-techniques-for-go/)
+
+## Miscelaneous
+* [Buy Me a Coffe badge](https://gist.github.com/gbraad/216f8162d9b382d14b8a097a37cc2c72#file-readme-md)

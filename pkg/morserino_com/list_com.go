@@ -24,7 +24,6 @@ THE SOFTWARE.
 
 import (
 	"fmt"
-	"go.bug.st/serial/enumerator"
 	"log"
 )
 
@@ -70,7 +69,7 @@ func Get_com_list() comPortList {
 	var workComPortList comPortList
 	workComPortList.nbrOfPorts = 0
 
-	ports, err := enumerator.GetDetailedPortsList()
+	ports, err := genericEnumPorts.GetDetailedPortsList()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -101,6 +100,7 @@ func Get_com_list() comPortList {
 	return workComPortList
 }
 
+//Takes a list of COM ports and generates a nicely formatted output
 func prettyPrint_comList(portList comPortList) []string {
 	var buffer []string
 

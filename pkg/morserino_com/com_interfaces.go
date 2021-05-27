@@ -1,4 +1,4 @@
-package morserino_console
+package morserino_com
 
 /*
 Copyright © 2021 Jean-Marc Meessen, ON4KJM <on4kjm@gmail.com>
@@ -23,29 +23,38 @@ THE SOFTWARE.
 */
 
 import (
-	"fmt"
-	"strings"
+	"go.bug.st/serial"
+	"go.bug.st/serial/enumerator"
 )
 
-//FIXME: Add comment
-type ConsoleDisplay struct {
-	currentLine string
-	newLine     string
+var genericOpenComPort openComPortInterface
+var genericEnumPorts enumeratePortsInterface
+
+func init() {
+	genericOpenComPort = openComPort{}
+	genericEnumPorts = enumeratePorts{}
 }
 
-func (cd *ConsoleDisplay) String() string {
-	//FIXME: add something useful here
-	return ""
+//============
+
+type openComPortInterface interface {
+	Open(portName string, mode *serial.Mode) (serial.Port, error)
 }
 
-func (cd *ConsoleDisplay) Add(buff string) {
-	if strings.Contains(buff, "=") {
-		//FIXME: is the buffer one char long
-		fmt.Println("=")
-	} else {
-		fmt.Printf("%s", buff)
-	}
+type openComPort struct{}
+
+func (r openComPort) Open(portName string, mode *serial.Mode) (serial.Port, error) {
+	return serial.Open(portName, mode)
 }
 
-//TODO: add break on column
-//TODO: Add tests
+//==============
+
+type enumeratePortsInterface interface {
+	GetDetailedPortsList() ([]*enumerator.PortDetails, error)
+}
+
+type enumeratePorts struct{}
+
+func (e enumeratePorts) GetDetailedPortsList() ([]*enumerator.PortDetails, error) {
+	return enumerator.GetDetailedPortsList()
+}
