@@ -25,6 +25,8 @@ THE SOFTWARE.
 import (
 	"fmt"
 	"log"
+
+	"go.bug.st/serial/enumerator"
 )
 
 //structure to store port details
@@ -53,8 +55,18 @@ type comPortList struct {
 	portList []comPortItem
 }
 
+type comPortEnumerator interface {
+	GetDetailedPortsList() ([]*enumerator.PortDetails, error)
+}
+
+type EnumeratePorts struct{}
+
+func (e EnumeratePorts) GetDetailedPortsList() ([]*enumerator.PortDetails, error) {
+	return enumerator.GetDetailedPortsList()
+}
+
 // Gets the list of COM devices and displays them on the console
-func List_com(genericEnumPorts enumeratePortsInterface) {
+func List_com(genericEnumPorts comPortEnumerator) {
 	comList := Get_com_list(genericEnumPorts)
 	buffer := prettyPrint_comList(comList)
 	for _, line := range buffer {
@@ -64,7 +76,7 @@ func List_com(genericEnumPorts enumeratePortsInterface) {
 
 //Gets all the ports on the system , checks whether it is a moreserino,
 // and returns an array of port description
-func Get_com_list(genericEnumPorts enumeratePortsInterface) comPortList {
+func Get_com_list(genericEnumPorts comPortEnumerator) comPortList {
 
 	var workComPortList comPortList
 	workComPortList.nbrOfPorts = 0

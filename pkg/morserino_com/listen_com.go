@@ -30,11 +30,10 @@ import (
 	"morserino_display/pkg/morserino_console"
 
 	"go.bug.st/serial"
-	"go.bug.st/serial/enumerator"
 )
 
 // Main listen function with display to the console
-func Listen_console(morserinoPortName string) error {
+func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator) error {
 
 	//Port parameters for a Morserino
 	mode := &serial.Mode{
@@ -43,8 +42,6 @@ func Listen_console(morserinoPortName string) error {
 		DataBits: 8,
 		StopBits: serial.OneStopBit,
 	}
-
-var genericEnumPorts enumeratePorts
 
 	//If portname "auto" was specified, we scan for the Morserino port
 	if strings.ToUpper(morserinoPortName) == "AUTO" {
@@ -69,7 +66,6 @@ var genericEnumPorts enumeratePorts
 	if err != nil {
 		log.Fatal(err)
 	}
-	
 
 	consoleDisplay := morserino_console.ConsoleDisplay{}
 

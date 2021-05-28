@@ -24,15 +24,12 @@ THE SOFTWARE.
 
 import (
 	"go.bug.st/serial"
-	"go.bug.st/serial/enumerator"
 )
 
 var genericOpenComPort openComPortInterface
-// var genericEnumPorts enumeratePortsInterface
 
 func init() {
 	genericOpenComPort = openComPort{}
-	// genericEnumPorts = enumeratePorts{}
 }
 
 //============
@@ -45,16 +42,4 @@ type openComPort struct{}
 
 func (r openComPort) Open(portName string, mode *serial.Mode) (serial.Port, error) {
 	return serial.Open(portName, mode)
-}
-
-//==============
-
-type enumeratePortsInterface interface {
-	GetDetailedPortsList() ([]*enumerator.PortDetails, error)
-}
-
-type enumeratePorts struct{}
-
-func (e enumeratePorts) GetDetailedPortsList() ([]*enumerator.PortDetails, error) {
-	return enumerator.GetDetailedPortsList()
 }

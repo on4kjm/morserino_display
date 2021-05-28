@@ -33,7 +33,9 @@ var listCmd = &cobra.Command{
 	Long: `Displays the ports available on the system.
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		morserino_com.List_com()
+		//We are going to use the real function to enumerate ports
+		var realEnumPorts morserino_com.EnumeratePorts
+		morserino_com.List_com(realEnumPorts)
 	},
 }
 
