@@ -54,8 +54,8 @@ type comPortList struct {
 }
 
 // Gets the list of COM devices and displays them on the console
-func List_com() {
-	comList := Get_com_list()
+func List_com(genericEnumPorts enumeratePortsInterface) {
+	comList := Get_com_list(genericEnumPorts)
 	buffer := prettyPrint_comList(comList)
 	for _, line := range buffer {
 		fmt.Println(line)
@@ -64,7 +64,7 @@ func List_com() {
 
 //Gets all the ports on the system , checks whether it is a moreserino,
 // and returns an array of port description
-func Get_com_list() comPortList {
+func Get_com_list(genericEnumPorts enumeratePortsInterface) comPortList {
 
 	var workComPortList comPortList
 	workComPortList.nbrOfPorts = 0

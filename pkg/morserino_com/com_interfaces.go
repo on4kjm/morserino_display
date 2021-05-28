@@ -28,11 +28,11 @@ import (
 )
 
 var genericOpenComPort openComPortInterface
-var genericEnumPorts enumeratePortsInterface
+// var genericEnumPorts enumeratePortsInterface
 
 func init() {
 	genericOpenComPort = openComPort{}
-	genericEnumPorts = enumeratePorts{}
+	// genericEnumPorts = enumeratePorts{}
 }
 
 //============
