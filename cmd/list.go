@@ -24,7 +24,7 @@ package cmd
 import (
 	"fmt"
 	"log"
-	"morserino_display/pkg/morserino_com"
+	"github.com/on4kjm/morserino_display/pkg/morserino_com"
 
 	"github.com/spf13/cobra"
 )

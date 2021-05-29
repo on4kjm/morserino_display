@@ -21,7 +21,7 @@ THE SOFTWARE.
 */
 package main
 
-import "morserino_display/cmd"
+import "github.com/on4kjm/morserino_display/cmd"
 
 func main() {
 	cmd.Execute()

@@ -23,7 +23,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"morserino_display/pkg/morserino_com"
+	"github.com/on4kjm/morserino_display/pkg/morserino_com"
 )
 
 // consoleCmd represents the console command

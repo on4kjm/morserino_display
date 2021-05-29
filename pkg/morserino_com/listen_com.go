@@ -27,7 +27,7 @@ import (
 	"log"
 	"strings"
 
-	"morserino_display/pkg/morserino_console"
+	"github.com/on4kjm/morserino_display/pkg/morserino_console"
 
 	"go.bug.st/serial"
 )
