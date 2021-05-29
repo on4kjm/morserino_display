@@ -8,6 +8,5 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.7.0
 	go.bug.st/serial v1.1.3
-	// go.bug.st/serial v1.1.3
 	golang.org/x/sys v0.0.0-20200909081042-eff7692f9009
 )
