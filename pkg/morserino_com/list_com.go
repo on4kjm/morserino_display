@@ -139,6 +139,11 @@ func format_com_item(item comPortItem) string {
 	} else {
 		morserinoFlag = "   "
 	}
-	buffer := fmt.Sprintf("%s %-30s (USB ID: %4s:%4s, USB Serial: %s)", morserinoFlag, item.portName, item.usbVendorID, item.usbProductID, item.serialNumber)
+	var buffer string
+	if len(item.usbProductID) == 0 {
+		buffer = fmt.Sprintf("%s %-30s", morserinoFlag, item.portName)
+	} else {
+		buffer = fmt.Sprintf("%s %-30s (USB ID: %4s:%4s, USB Serial: %s)", morserinoFlag, item.portName, item.usbVendorID, item.usbProductID, item.serialNumber)
+	}
 	return buffer
 }

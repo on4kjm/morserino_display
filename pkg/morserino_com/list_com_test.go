@@ -281,6 +281,13 @@ func Test_format_com_item(t *testing.T) {
 				isMorserinoPort: false}},
 			"    Port Name                      (USB ID:    X:   Y, USB Serial: 01)",
 		},
+		{
+			"Format item: non-USB device",
+			args{item: comPortItem{
+				portName:        "Port Name",
+				isMorserinoPort: false}},
+			"    Port Name                     ",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
