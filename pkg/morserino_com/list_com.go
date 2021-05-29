@@ -24,9 +24,8 @@ THE SOFTWARE.
 
 import (
 	"fmt"
-	"log"
-
 	"go.bug.st/serial/enumerator"
+	"strings"
 )
 
 //structure to store port details
@@ -66,28 +65,29 @@ func (e EnumeratePorts) GetDetailedPortsList() ([]*enumerator.PortDetails, error
 }
 
 // Gets the list of COM devices and displays them on the console
-func List_com(genericEnumPorts comPortEnumerator) {
-	comList := Get_com_list(genericEnumPorts)
-	buffer := prettyPrint_comList(comList)
-	for _, line := range buffer {
-		fmt.Println(line)
+func List_com(genericEnumPorts comPortEnumerator) (string, error) {
+	comList, err := Get_com_list(genericEnumPorts)
+	if err != nil {
+		return "", err
 	}
+	output := strings.Join(prettyPrint_comList(comList), "\n")
+	return output, nil
 }
 
 //Gets all the ports on the system , checks whether it is a moreserino,
 // and returns an array of port description
-func Get_com_list(genericEnumPorts comPortEnumerator) comPortList {
+func Get_com_list(genericEnumPorts comPortEnumerator) (comPortList, error) {
 
 	var workComPortList comPortList
 	workComPortList.nbrOfPorts = 0
 
 	ports, err := genericEnumPorts.GetDetailedPortsList()
 	if err != nil {
-		log.Fatal(err)
+		return workComPortList, err
 	}
 	if len(ports) == 0 {
 		workComPortList.nbrOfPorts = 0
-		return workComPortList
+		return workComPortList, nil
 	}
 
 	for _, port := range ports {
@@ -109,7 +109,7 @@ func Get_com_list(genericEnumPorts comPortEnumerator) comPortList {
 			workComPortList.morserinoPortName = wrkPortItem.portName
 		}
 	}
-	return workComPortList
+	return workComPortList, nil
 }
 
 //Takes a list of COM ports and generates a nicely formatted output

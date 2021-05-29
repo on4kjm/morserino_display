@@ -29,9 +29,11 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
+
 //Global variable containing the name of the configuration file
 var cfgFile string
-//Global variable with the port name 
+
+//Global variable with the port name
 var morserinoPortName string
 
 // rootCmd represents the base command when called without any subcommands

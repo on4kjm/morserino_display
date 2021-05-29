@@ -45,7 +45,10 @@ func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator
 
 	//If portname "auto" was specified, we scan for the Morserino port
 	if strings.ToUpper(morserinoPortName) == "AUTO" {
-		theComPortList := Get_com_list(genericEnumPorts)
+		theComPortList, err := Get_com_list(genericEnumPorts)
+		if err != nil {
+			return err
+		}
 
 		if theComPortList.nbrOfMorserinoPorts == 0 {
 			fmt.Println("Didn't find a connected Morserino!")
