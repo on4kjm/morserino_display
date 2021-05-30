@@ -22,8 +22,8 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/on4kjm/morserino_display/pkg/morserino_com"
+	"github.com/spf13/cobra"
 )
 
 // consoleCmd represents the console command

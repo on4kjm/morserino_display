@@ -23,8 +23,8 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"github.com/on4kjm/morserino_display/pkg/morserino_com"
+	"log"
 
 	"github.com/spf13/cobra"
 )

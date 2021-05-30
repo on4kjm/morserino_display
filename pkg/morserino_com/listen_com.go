@@ -70,6 +70,8 @@ func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator
 		log.Fatal(err)
 	}
 
+	defer myPort.Close()
+
 	consoleDisplay := morserino_console.ConsoleDisplay{}
 
 	buff := make([]byte, 100)
