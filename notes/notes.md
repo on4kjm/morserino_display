@@ -47,6 +47,9 @@ See also [Create a CLI in golang with Cobra](https://codesource.io/create-a-cli-
 * [package iotest](https://golang.org/pkg/testing/iotest/)
 * [Golang basics - writing unit tests](https://blog.alexellis.io/golang-writing-unit-tests/)
 * [iotest.OneByteReader example](https://golang.hotexamples.com/fr/examples/testing.iotest/-/OneByteReader/golang-onebytereader-function-examples.html)
+* [Refactoring Go Code to Avoid File I/O in Unit Tests](https://endler.dev/2018/go-io-testing/)
+* [ustforfunc #29: dependency injection in a code review](https://www.youtube.com/watch?v=ifBUfIb7kdo) 
+* [Learn Go with tests](https://quii.gitbook.io/learn-go-with-tests/)
 
 ## Miscelaneous
 * [Buy Me a Coffe badge](https://gist.github.com/gbraad/216f8162d9b382d14b8a097a37cc2c72#file-readme-md)
