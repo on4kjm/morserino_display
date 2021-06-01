@@ -1,3 +1,5 @@
+package morserino_com
+
 /*
 Copyright © 2021 Jean-Marc Meessen, ON4KJM <on4kjm@gmail.com>
 
@@ -19,45 +21,25 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-package cmd
 
 import (
-	"fmt"
-	"log"
-	"morserino_display/pkg/morserino_com"
-
-	"github.com/spf13/cobra"
+	"go.bug.st/serial"
 )
 
-// listCmd represents the list command
-var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "Displays the available ports",
-	Long: `Displays the ports available on the system.
-	`,
-	Run: func(cmd *cobra.Command, args []string) {
-		//We are going to use the real function to enumerate ports
-		var realEnumPorts morserino_com.EnumeratePorts
-
-		//Get the pretty printed list of devices
-		output, err := morserino_com.List_com(realEnumPorts)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println(output)
-	},
-}
+var genericOpenComPort openComPortInterface
 
 func init() {
-	rootCmd.AddCommand(listCmd)
+	genericOpenComPort = openComPort{}
+}
 
-	// Here you will define your flags and configuration settings.
+//============
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// listCmd.PersistentFlags().String("foo", "", "A help for foo")
+type openComPortInterface interface {
+	Open(portName string, mode *serial.Mode) (serial.Port, error)
+}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+type openComPort struct{}
+
+func (r openComPort) Open(portName string, mode *serial.Mode) (serial.Port, error) {
+	return serial.Open(portName, mode)
 }
