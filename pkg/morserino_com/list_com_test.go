@@ -6,55 +6,20 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.bug.st/serial/enumerator"
 )
 
 //
 // ============ Mock definitions ==================
 
-//Happy case mock
-type mockEnumeratePorts_OK struct{}
-
-//Happy case mocked method
-func (e mockEnumeratePorts_OK) GetDetailedPortsList() ([]*enumerator.PortDetails, error) {
-	happyCaseList := []*enumerator.PortDetails{}
-
-	item1 := enumerator.PortDetails{
-		Name:         "COM Port Name",
-		IsUSB:        true,
-		VID:          "XXXX",
-		PID:          "YYYY",
-		SerialNumber: "001",
-	}
-	item2 := enumerator.PortDetails{
-		Name:         "Morserino Port",
-		IsUSB:        true,
-		VID:          "10C4",
-		PID:          "EA60",
-		SerialNumber: "002",
-	}
-	happyCaseList = append(happyCaseList, &item1)
-	happyCaseList = append(happyCaseList, &item2)
-
-	return happyCaseList, nil
+type mockPortEnumerator struct {
+	ports []*enumerator.PortDetails
+	err   error
 }
 
-// Mock that returns an error
-type mockEnumeratePorts_error struct{}
-
-// Mocked method that returns an error
-func (e mockEnumeratePorts_error) GetDetailedPortsList() ([]*enumerator.PortDetails, error) {
-	return nil, fmt.Errorf("An error occured")
-}
-
-// Mock that found no ports
-type mockEnumeratePorts_noPort struct{}
-
-// Mocked method that found no ports
-func (e mockEnumeratePorts_noPort) GetDetailedPortsList() ([]*enumerator.PortDetails, error) {
-	emptyList := []*enumerator.PortDetails{}
-
-	return emptyList, nil
+func (e mockPortEnumerator) GetDetailedPortsList() ([]*enumerator.PortDetails, error) {
+	return e.ports, e.err
 }
 
 //
@@ -63,11 +28,28 @@ func (e mockEnumeratePorts_noPort) GetDetailedPortsList() ([]*enumerator.PortDet
 
 func Test_Get_com_list_HappyCase(t *testing.T) {
 
-	//Happy case mock
-	var mockEnumPorts mockEnumeratePorts_OK
+	// Setup mock
+	portEnumerator := mockPortEnumerator{
+		ports: []*enumerator.PortDetails{
+			{
+				Name:         "COM Port Name",
+				IsUSB:        true,
+				VID:          "XXXX",
+				PID:          "YYYY",
+				SerialNumber: "001",
+			},
+			{
+				Name:         "Morserino Port",
+				IsUSB:        true,
+				VID:          "10C4",
+				PID:          "EA60",
+				SerialNumber: "002",
+			},
+		},
+	}
 
 	// System under test
-	comList, err := Get_com_list(mockEnumPorts)
+	comList, err := Get_com_list(portEnumerator)
 
 	//Expected Port List
 	targetPortList := []comPortItem{
@@ -88,20 +70,23 @@ func Test_Get_com_list_HappyCase(t *testing.T) {
 	}
 
 	//validate results
-	if assert.NoError(t, err) {
-		assert.Equal(t, comList.nbrOfPorts, 2)
-		assert.Equal(t, comList.nbrOfMorserinoPorts, 1)
-		assert.Equal(t, comList.morserinoPortName, "Morserino Port")
-		assert.Equal(t, comList.portList, targetPortList)
-	}
+	require.NoError(t, err)
+
+	assert.Equal(t, comList.nbrOfPorts, 2)
+	assert.Equal(t, comList.nbrOfMorserinoPorts, 1)
+	assert.Equal(t, comList.morserinoPortName, "Morserino Port")
+	assert.Equal(t, comList.portList, targetPortList)
 }
 
 func Test_Get_com_list_Error(t *testing.T) {
 	//Mock that returns an error
-	var mockEnumPorts mockEnumeratePorts_error
+	portEnumerator := mockPortEnumerator{
+		ports: nil,
+		err:   fmt.Errorf("An error occured"),
+	}
 
 	// System under test
-	_, err := Get_com_list(mockEnumPorts)
+	_, err := Get_com_list(portEnumerator)
 
 	//validate results
 	assert.Error(t, fmt.Errorf("An error occured"), err)
@@ -109,25 +94,44 @@ func Test_Get_com_list_Error(t *testing.T) {
 
 func Test_Get_com_list_noPort(t *testing.T) {
 	//Mock that found no ports
-	var mockEnumPorts mockEnumeratePorts_noPort
+	portEnumerator := mockPortEnumerator{
+		ports: []*enumerator.PortDetails{},
+		err:   nil,
+	}
 
 	// System under test
-	comList, err := Get_com_list(mockEnumPorts)
+	comList, err := Get_com_list(portEnumerator)
 
 	//validate results
-	if assert.NoError(t, err) {
-		assert.Equal(t, 0, comList.nbrOfPorts)
-	}
+	require.NoError(t, err)
+	assert.Equal(t, 0, comList.nbrOfPorts)
 }
 
 // ===============================
 
 func Test_List_com_happyCase(t *testing.T) {
 	// Happy case mock
-	var mockEnumPorts mockEnumeratePorts_OK
+	portEnumerator := mockPortEnumerator{
+		ports: []*enumerator.PortDetails{
+			{
+				Name:         "COM Port Name",
+				IsUSB:        true,
+				VID:          "XXXX",
+				PID:          "YYYY",
+				SerialNumber: "001",
+			},
+			{
+				Name:         "Morserino Port",
+				IsUSB:        true,
+				VID:          "10C4",
+				PID:          "EA60",
+				SerialNumber: "002",
+			},
+		},
+	}
 
 	// System under test with mock
-	output, err := List_com(mockEnumPorts)
+	output, err := List_com(portEnumerator)
 
 	// Validating results
 	if assert.NoError(t, err) {
@@ -137,11 +141,14 @@ func Test_List_com_happyCase(t *testing.T) {
 }
 
 func Test_List_com_error(t *testing.T) {
-	// Mock that returns an error
-	var mockEnumPorts mockEnumeratePorts_error
+	//Mock that returns an error
+	portEnumerator := mockPortEnumerator{
+		ports: nil,
+		err:   fmt.Errorf("An error occured"),
+	}
 
 	// System under test with mock
-	output, err := List_com(mockEnumPorts)
+	output, err := List_com(portEnumerator)
 
 	// Validating results
 	assert.Error(t, fmt.Errorf("An error occured"), err)
