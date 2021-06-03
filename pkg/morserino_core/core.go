@@ -33,10 +33,9 @@ import (
 func Morserino_console(morserinoPortName string) {
 	// Setting up the EnumPorts to the "real life" implementation
 	var realEnumPorts morserino_com.EnumeratePorts
-	var realOpenComPort morserino_com.OpenMorserinoPort
 	var realComPort morserino_com.MorserinoPort
 
-	morserino_com.Listen_console(morserinoPortName, realEnumPorts, realOpenComPort,realComPort)
+	morserino_com.Listen_console(morserinoPortName, realEnumPorts, realComPort)
 }
 
 //Main entry point for listing ports
