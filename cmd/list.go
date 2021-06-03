@@ -22,9 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
-	"github.com/on4kjm/morserino_display/pkg/morserino_com"
-	"log"
+	"github.com/on4kjm/morserino_display/pkg/morserino_core"
 
 	"github.com/spf13/cobra"
 )
@@ -36,15 +34,7 @@ var listCmd = &cobra.Command{
 	Long: `Displays the ports available on the system.
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		//We are going to use the real function to enumerate ports
-		var realEnumPorts morserino_com.EnumeratePorts
-
-		//Get the pretty printed list of devices
-		output, err := morserino_com.List_com(realEnumPorts)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println(output)
+		morserino_core.Morserino_list()
 	},
 }
 

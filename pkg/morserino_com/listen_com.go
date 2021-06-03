@@ -28,9 +28,51 @@ import (
 	"strings"
 
 	"github.com/on4kjm/morserino_display/pkg/morserino_console"
-
 	"go.bug.st/serial"
 )
+
+// Channel used to forward data received on the serial port to the display modules
+var MessageBuffer = make(chan string, 10)
+
+//
+// Interfaces for COM related stuff
+// (inspired by https://stackoverflow.com/questions/41053280/how-to-write-mock-for-structs-in-go)
+//
+
+// Morserino Port interface
+type IMorserinoPort interface {
+	MorserinoRead()
+	MorserinoClose() error
+}
+
+//Real implementation
+type MorserinoPort struct {
+	port serial.Port
+}
+
+func (mp MorserinoPort) MorserinoRead(p []byte) (n int, err error) {
+	return (mp.port.Read(p))
+}
+
+func (mp MorserinoPort) MorserinoClose() error {
+	return (mp.port.Close())
+}
+
+// Open MorserinoPort interface
+type IMorserinoPortOpen interface {
+	MorserinoOpen(portName string, mode *serial.Mode) (IMorserinoPort, error)
+}
+
+// Real implementation
+type openMorserinoPort struct{}
+
+func (r openMorserinoPort) MorserinoOpen(portName string, mode *serial.Mode) (serial.Port, error) {
+	return serial.Open(portName, mode)
+}
+
+//
+// Business logic
+//
 
 // Main listen function with display to the console
 func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator) error {
@@ -42,6 +84,8 @@ func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator
 		DataBits: 8,
 		StopBits: serial.OneStopBit,
 	}
+
+	//TODO: implement the simulator
 
 	//If portname "auto" was specified, we scan for the Morserino port
 	if strings.ToUpper(morserinoPortName) == "AUTO" {
@@ -64,29 +108,61 @@ func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator
 		fmt.Println("Automatically detected Morserino port: " + morserinoPortName + "\n")
 	}
 
-	fmt.Println("Listening to port \"" + morserinoPortName + "\"")
-	myPort, err := genericOpenComPort.Open(morserinoPortName, mode)
+	log.Println("Listening to port \"" + morserinoPortName + "\"")
+
+	var genericOpenComPort openMorserinoPort
+	var genericComPort MorserinoPort
+	myPort, err := genericOpenComPort.MorserinoOpen(morserinoPortName, mode)
 	if err != nil {
 		log.Fatal(err)
 	}
+	genericComPort.port = myPort
 
-	defer myPort.Close()
+	//We want to make sure that we close the port
+	defer genericComPort.MorserinoClose()
 
+	//TODO: needs to be moved as a goroutine
 	consoleDisplay := morserino_console.ConsoleDisplay{}
 
+	var closeKey string
+	possibleExitRequest := false
+	closeRequested := false
 	buff := make([]byte, 100)
 	for {
 		// Reads up to 100 bytes
-		n, err := myPort.Read(buff)
+		n, err := genericComPort.MorserinoRead(buff)
 		if err != nil {
 			log.Fatal(err)
 		}
+		//log.Printf("Received %d bytes, data buffer: \"%s\"", n, string(buff[:n]))
+		if string(buff[0:1]) == "<" {
+			closeKey = "<"
+			possibleExitRequest = true
+		} else {
+			if possibleExitRequest {
+				closeKey = closeKey + string(buff[:n])
+				if(!strings.HasPrefix("<sk> e e", closeKey)) {
+					possibleExitRequest = false
+				} else {
+					if(closeKey == "<sk> e e") {
+						closeRequested = true
+					}
+				}
+			}
+		}
+
 		if n == 0 {
 			fmt.Println("\nEOF")
 			break
 		}
 
+		// TODO: move this out and use a channel for that
 		consoleDisplay.Add(string(buff[:n]))
+
+		if closeRequested {
+			consoleDisplay.Add("\nExiting...\n")
+			break
+		}
 	}
 	return nil
 }

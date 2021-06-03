@@ -51,5 +51,9 @@ See also [Create a CLI in golang with Cobra](https://codesource.io/create-a-cli-
 * [ustforfunc #29: dependency injection in a code review](https://www.youtube.com/watch?v=ifBUfIb7kdo) 
 * [Learn Go with tests](https://quii.gitbook.io/learn-go-with-tests/)
 
+* How to pass a channel to a HandleFunc:
+  * [StackOverFlow (2015): Golang handlefunc with channel](https://stackoverflow.com/questions/28419876/golang-handlefunc-with-channel)
+  * use a package level variable. Maybe create it in the Web Package ?
+
 ## Miscelaneous
 * [Buy Me a Coffe badge](https://gist.github.com/gbraad/216f8162d9b382d14b8a097a37cc2c72#file-readme-md)

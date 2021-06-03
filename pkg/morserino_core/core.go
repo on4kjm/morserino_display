@@ -1,4 +1,4 @@
-package morserino_com
+package morserino_core
 
 /*
 Copyright © 2021 Jean-Marc Meessen, ON4KJM <on4kjm@gmail.com>
@@ -23,23 +23,29 @@ THE SOFTWARE.
 */
 
 import (
-	"go.bug.st/serial"
+	"fmt"
+	"log"
+
+	"github.com/on4kjm/morserino_display/pkg/morserino_com"
 )
 
-var genericOpenComPort openComPortInterface
+// Main entry point for console output
+func Morserino_console(morserinoPortName string) {
+	// Setting up the EnumPorts to the "real life" implementation
+	var realEnumPorts morserino_com.EnumeratePorts
 
-func init() {
-	genericOpenComPort = openComPort{}
+	morserino_com.Listen_console(morserinoPortName, realEnumPorts)
 }
 
-//============
+//Main entry point for listing ports
+func Morserino_list() {
+	//We are going to use the real function to enumerate ports
+	var realEnumPorts morserino_com.EnumeratePorts
 
-type openComPortInterface interface {
-	Open(portName string, mode *serial.Mode) (serial.Port, error)
-}
-
-type openComPort struct{}
-
-func (r openComPort) Open(portName string, mode *serial.Mode) (serial.Port, error) {
-	return serial.Open(portName, mode)
+	//Get the pretty printed list of devices
+	output, err := morserino_com.List_com(realEnumPorts)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(output)
 }
