@@ -38,8 +38,6 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		morserino_core.Morserino_console(morserinoPortName)
-		// var realEnumPorts morserino_com.EnumeratePorts
-		// morserino_com.Listen_console(morserinoPortName, realEnumPorts)
 	},
 }
 

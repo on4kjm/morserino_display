@@ -41,32 +41,40 @@ var MessageBuffer = make(chan string, 10)
 
 // Morserino Port interface
 type IMorserinoPort interface {
-	MorserinoRead()
+	MorserinoRead(p []byte)  (n int, err error)
 	MorserinoClose() error
 }
 
 //Real implementation
 type MorserinoPort struct {
-	port serial.Port
+	Port serial.Port
 }
 
 func (mp MorserinoPort) MorserinoRead(p []byte) (n int, err error) {
-	return (mp.port.Read(p))
+	return (mp.Port.Read(p))
 }
 
 func (mp MorserinoPort) MorserinoClose() error {
-	return (mp.port.Close())
+	return (mp.Port.Close())
 }
+
 
 // Open MorserinoPort interface
 type IMorserinoPortOpen interface {
 	MorserinoOpen(portName string, mode *serial.Mode) (IMorserinoPort, error)
 }
 
-// Real implementation
-type openMorserinoPort struct{}
+// type MorserinoOpenWraper struct {
+// 	OpenMorserinoPort
+// }
 
-func (r openMorserinoPort) MorserinoOpen(portName string, mode *serial.Mode) (serial.Port, error) {
+// func (w MorserinoOpenWraper) MorserinoOpenW(portName string, mode *serial.Mode) (IMorserinoPort, error) {
+// 	return w.OpenMorserinoPort.MorserinoOpen(portName, mode)
+
+// Real implementation
+type OpenMorserinoPort struct{}
+
+func (r OpenMorserinoPort) MorserinoOpen(portName string, mode *serial.Mode) (serial.Port, error) {
 	return serial.Open(portName, mode)
 }
 
@@ -75,7 +83,7 @@ func (r openMorserinoPort) MorserinoOpen(portName string, mode *serial.Mode) (se
 //
 
 // Main listen function with display to the console
-func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator) error {
+func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator, genericOpenComPort IMorserinoPortOpen, genericComPort IMorserinoPort) error {
 
 	//Port parameters for a Morserino
 	mode := &serial.Mode{
@@ -110,13 +118,12 @@ func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator
 
 	log.Println("Listening to port \"" + morserinoPortName + "\"")
 
-	var genericOpenComPort openMorserinoPort
-	var genericComPort MorserinoPort
+
 	myPort, err := genericOpenComPort.MorserinoOpen(morserinoPortName, mode)
 	if err != nil {
 		log.Fatal(err)
 	}
-	genericComPort.port = myPort
+	genericComPort.Port = myPort
 
 	//We want to make sure that we close the port
 	defer genericComPort.MorserinoClose()
@@ -134,7 +141,9 @@ func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator
 		if err != nil {
 			log.Fatal(err)
 		}
-		//log.Printf("Received %d bytes, data buffer: \"%s\"", n, string(buff[:n]))
+
+		// Check whether the "end of transmission" was sent
+		// TODO: move this in a seperate structure/function
 		if string(buff[0:1]) == "<" {
 			closeKey = "<"
 			possibleExitRequest = true
