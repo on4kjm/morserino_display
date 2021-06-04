@@ -1,7 +1,19 @@
 package morserino_com
 
-import "testing"
+import (
+	"os"
+	"testing"
 
-func TestListen_console(t *testing.T) {
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
 
+func TestListen(t *testing.T) {
+	f, err := os.Open("./example-file.txt")
+	require.NoError(t, err)
+
+	defer f.Close()
+
+	err = Listen(f)
+	assert.NoError(t, err)
 }

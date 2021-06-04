@@ -24,10 +24,10 @@ THE SOFTWARE.
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"strings"
 
-	"github.com/on4kjm/morserino_display/pkg/morserino_console"
 	"go.bug.st/serial"
 )
 
@@ -43,7 +43,7 @@ var MessageBuffer = make(chan string, 10)
 type IMorserinoPort interface {
 	// serial.Port
 	MorserinoOpen(string, *serial.Mode) error
-	MorserinoRead(p []byte)  (int, error)
+	MorserinoRead(p []byte) (int, error)
 	MorserinoClose() error
 }
 
@@ -56,7 +56,7 @@ func (mp MorserinoPort) MorserinoOpen(portName string, mode *serial.Mode) error 
 	var aPort serial.Port
 	aPort, err := serial.Open(portName, mode)
 	mp.Port = aPort
-	log.Printf("OPEN: aPort: %v, mp.Port: %v",aPort, mp.Port)
+	log.Printf("OPEN: aPort: %v, mp.Port: %v", aPort, mp.Port)
 	return err
 }
 
@@ -69,7 +69,6 @@ func (mp MorserinoPort) MorserinoClose() error {
 	log.Printf("CLOSE: mp.Port: %v", mp.Port)
 	return (mp.Port.Close())
 }
-
 
 // // Open MorserinoPort interface
 // type IMorserinoPortOpen interface {
@@ -95,8 +94,7 @@ func (mp MorserinoPort) MorserinoClose() error {
 //
 
 // Main listen function with display to the console
-func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator, genericComPort IMorserinoPort) error {
-
+func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator) error {
 	//Port parameters for a Morserino
 	mode := &serial.Mode{
 		BaudRate: 115200,
@@ -130,25 +128,24 @@ func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator
 
 	log.Println("Listening to port \"" + morserinoPortName + "\"")
 
-
-	err := genericComPort.MorserinoOpen(morserinoPortName, mode)
+	p, err := serial.Open(morserinoPortName, mode)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	//We want to make sure that we close the port
-	defer genericComPort.MorserinoClose()
+	defer p.Close()
 
-	//TODO: needs to be moved as a goroutine
-	consoleDisplay := morserino_console.ConsoleDisplay{}
+	return Listen(p)
+}
 
+func Listen(port io.Reader) error {
 	var closeKey string
 	possibleExitRequest := false
 	closeRequested := false
 	buff := make([]byte, 100)
 	for {
 		// Reads up to 100 bytes
-		n, err := genericComPort.MorserinoRead(buff)
+		n, err := port.Read(buff)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -161,10 +158,10 @@ func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator
 		} else {
 			if possibleExitRequest {
 				closeKey = closeKey + string(buff[:n])
-				if(!strings.HasPrefix("<sk> e e", closeKey)) {
+				if !strings.HasPrefix("<sk> e e", closeKey) {
 					possibleExitRequest = false
 				} else {
-					if(closeKey == "<sk> e e") {
+					if closeKey == "<sk> e e" {
 						closeRequested = true
 					}
 				}
@@ -184,5 +181,6 @@ func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator
 			break
 		}
 	}
+
 	return nil
 }
