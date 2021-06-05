@@ -24,6 +24,7 @@ THE SOFTWARE.
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"strings"
 
@@ -34,48 +35,25 @@ import (
 // Channel used to forward data received on the serial port to the display modules
 var MessageBuffer = make(chan string, 10)
 
-//
-// Interfaces for COM related stuff
-// (inspired by https://stackoverflow.com/questions/41053280/how-to-write-mock-for-structs-in-go)
-//
-
-// Morserino Port interface
-type IMorserinoPort interface {
-	MorserinoRead()
-	MorserinoClose() error
-}
-
-//Real implementation
-type MorserinoPort struct {
-	port serial.Port
-}
-
-func (mp MorserinoPort) MorserinoRead(p []byte) (n int, err error) {
-	return (mp.port.Read(p))
-}
-
-func (mp MorserinoPort) MorserinoClose() error {
-	return (mp.port.Close())
-}
-
-// Open MorserinoPort interface
-type IMorserinoPortOpen interface {
-	MorserinoOpen(portName string, mode *serial.Mode) (IMorserinoPort, error)
-}
-
-// Real implementation
-type openMorserinoPort struct{}
-
-func (r openMorserinoPort) MorserinoOpen(portName string, mode *serial.Mode) (serial.Port, error) {
-	return serial.Open(portName, mode)
-}
-
-//
-// Business logic
-//
-
 // Main listen function with display to the console
 func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator) error {
+
+	//If requested, use the simulator instead of a real Morserino
+	if strings.HasPrefix("SIMULATOR", strings.ToUpper(morserinoPortName)) {
+		fmt.Println("Simulator requested")
+		return nil
+	}
+
+	//If portname "auto" was specified, we scan for the Morserino port
+	if strings.ToUpper(morserinoPortName) == "AUTO" {
+		portName, err := Get_MorserinoPort_automatically(genericEnumPorts)
+		if err != nil {
+			return err
+		}
+		morserinoPortName = portName
+	}
+
+	log.Println("Listening to port \"" + morserinoPortName + "\"")
 
 	//Port parameters for a Morserino
 	mode := &serial.Mode{
@@ -85,42 +63,17 @@ func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator
 		StopBits: serial.OneStopBit,
 	}
 
-	//TODO: implement the simulator
-
-	//If portname "auto" was specified, we scan for the Morserino port
-	if strings.ToUpper(morserinoPortName) == "AUTO" {
-		theComPortList, err := Get_com_list(genericEnumPorts)
-		if err != nil {
-			return err
-		}
-
-		if theComPortList.nbrOfMorserinoPorts == 0 {
-			fmt.Println("Didn't find a connected Morserino!")
-			return fmt.Errorf("Did not find a usable port.")
-		}
-
-		if theComPortList.nbrOfMorserinoPorts > 1 {
-			fmt.Println("ERROR: Multiple Morserino devices found.")
-			return fmt.Errorf("ERROR: Multiple Morserino devices found.")
-		}
-
-		morserinoPortName = theComPortList.morserinoPortName
-		fmt.Println("Automatically detected Morserino port: " + morserinoPortName + "\n")
-	}
-
-	log.Println("Listening to port \"" + morserinoPortName + "\"")
-
-	var genericOpenComPort openMorserinoPort
-	var genericComPort MorserinoPort
-	myPort, err := genericOpenComPort.MorserinoOpen(morserinoPortName, mode)
+	p, err := serial.Open(morserinoPortName, mode)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	genericComPort.port = myPort
+	defer p.Close()
 
-	//We want to make sure that we close the port
-	defer genericComPort.MorserinoClose()
+	return Listen(p)
+}
 
+// Main receive loop
+func Listen(port io.Reader) error {
 	//TODO: needs to be moved as a goroutine
 	consoleDisplay := morserino_console.ConsoleDisplay{}
 
@@ -130,21 +83,23 @@ func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator
 	buff := make([]byte, 100)
 	for {
 		// Reads up to 100 bytes
-		n, err := genericComPort.MorserinoRead(buff)
+		n, err := port.Read(buff)
 		if err != nil {
 			log.Fatal(err)
 		}
-		//log.Printf("Received %d bytes, data buffer: \"%s\"", n, string(buff[:n]))
+
+		// Check whether the "end of transmission" was sent
+		// TODO: move this in a seperate structure/function
 		if string(buff[0:1]) == "<" {
 			closeKey = "<"
 			possibleExitRequest = true
 		} else {
 			if possibleExitRequest {
 				closeKey = closeKey + string(buff[:n])
-				if(!strings.HasPrefix("<sk> e e", closeKey)) {
+				if !strings.HasPrefix("<sk> e e", closeKey) {
 					possibleExitRequest = false
 				} else {
-					if(closeKey == "<sk> e e") {
+					if closeKey == "<sk> e e" {
 						closeRequested = true
 					}
 				}
@@ -164,5 +119,29 @@ func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator
 			break
 		}
 	}
+
 	return nil
+}
+
+// Tries to auto detect the Morserino port
+func Get_MorserinoPort_automatically(genericEnumPorts comPortEnumerator) (string, error) {
+	theComPortList, err := Get_com_list(genericEnumPorts)
+	if err != nil {
+		return "", err
+	}
+
+	if theComPortList.nbrOfMorserinoPorts == 0 {
+		fmt.Println("Didn't find a connected Morserino!")
+		return "", fmt.Errorf("Did not find a usable port.")
+	}
+
+	if theComPortList.nbrOfMorserinoPorts > 1 {
+		fmt.Println("ERROR: Multiple Morserino devices found.")
+		return "", fmt.Errorf("ERROR: Multiple Morserino devices found.")
+	}
+
+	morserinoPortName := theComPortList.morserinoPortName
+	fmt.Println("Automatically detected Morserino port: " + morserinoPortName + "\n")
+
+	return morserinoPortName, nil
 }
