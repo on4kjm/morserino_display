@@ -27,6 +27,7 @@ import (
 	"io"
 	"log"
 	"strings"
+	"testing/iotest"
 
 	"github.com/on4kjm/morserino_display/pkg/morserino_console"
 	"go.bug.st/serial"
@@ -40,7 +41,8 @@ func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator
 
 	//If requested, use the simulator instead of a real Morserino
 	if strings.HasPrefix("SIMULATOR", strings.ToUpper(morserinoPortName)) {
-		fmt.Println("Simulator requested")
+		TestMessage := "cq cq de on4kjm on4kjm = tks fer call om = ur rst 599 = hw? \n73 de on4kjm = <sk> e e"
+		Listen(iotest.OneByteReader(strings.NewReader(TestMessage)))
 		return nil
 	}
 

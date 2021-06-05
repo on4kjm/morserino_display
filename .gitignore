@@ -1,3 +1,5 @@
 morserino_display
 dist/*
 notes/help.txt
+cover.out
+coverage.txt

@@ -55,5 +55,11 @@ See also [Create a CLI in golang with Cobra](https://codesource.io/create-a-cli-
   * [StackOverFlow (2015): Golang handlefunc with channel](https://stackoverflow.com/questions/28419876/golang-handlefunc-with-channel)
   * use a package level variable. Maybe create it in the Web Package ?
 
+## Logging
+* [Top 6 Golang Logging Best Practices](https://qvault.io/golang/golang-logging-best-practices/)
+* [logrus](https://github.com/sirupsen/logrus#readme)
+* [Think Differently About What to Log in Go: Best Practices Examined](https://www.loggly.com/blog/think-differently-about-what-to-log-in-go-best-practices-examined/)
+* [How to Design a Basic Logging System in Your Go Application](https://betterprogramming.pub/understanding-and-designing-logging-system-in-go-application-c85a28bb8526)
+
 ## Miscelaneous
 * [Buy Me a Coffe badge](https://gist.github.com/gbraad/216f8162d9b382d14b8a097a37cc2c72#file-readme-md)

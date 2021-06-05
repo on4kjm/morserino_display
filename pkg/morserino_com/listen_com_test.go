@@ -1,38 +1,14 @@
 package morserino_com
 
-/*
-Copyright © 2021 Jean-Marc Meessen, ON4KJM <on4kjm@gmail.com>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-*/
-
-
 import (
 	"fmt"
+	"io"
+	"strings"
 	"testing"
+	"testing/iotest"
 
 	"go.bug.st/serial/enumerator"
 )
-
-func TestListen_console(t *testing.T) {
-
-}
 
 func TestGet_MorserinoPort_automatically(t *testing.T) {
 	type args struct {
@@ -89,6 +65,65 @@ func TestGet_MorserinoPort_automatically(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("Get_MorserinoPort_automatically() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestListen(t *testing.T) {
+	type args struct {
+		port io.Reader
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			"Happy case",
+			args{iotest.OneByteReader(strings.NewReader("Test = test <sk> e e"))},
+			false,
+		},
+		{
+			"missed end marker",
+			args{iotest.OneByteReader(strings.NewReader("Test = test <skaaa <sk> e e"))},
+			false,
+		},
+		{
+			"EOF error (no error but no dat returned",
+			args{iotest.ErrReader(nil)},
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := Listen(tt.args.port); (err != nil) != tt.wantErr {
+				t.Errorf("Listen() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestListen_console(t *testing.T) {
+	type args struct {
+		morserinoPortName string
+		genericEnumPorts  comPortEnumerator
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			"Test simulator",
+			args{morserinoPortName: "simul", genericEnumPorts: nil},
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := Listen_console(tt.args.morserinoPortName, tt.args.genericEnumPorts); (err != nil) != tt.wantErr {
+				t.Errorf("Listen_console() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
