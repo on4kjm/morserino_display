@@ -33,22 +33,18 @@ import (
 	"go.bug.st/serial"
 )
 
-// Channel used to forward data received on the serial port to the display modules
-var MessageBuffer = make(chan string, 10)
-
 // Main listen function with display to the console
-func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator) error {
+func ConsoleListen(morserinoPortName string, genericEnumPorts comPortEnumerator) error {
 
 	//If requested, use the simulator instead of a real Morserino
 	if strings.HasPrefix("SIMULATOR", strings.ToUpper(morserinoPortName)) {
 		TestMessage := "cq cq de on4kjm on4kjm = tks fer call om = ur rst 599 = hw? \n73 de on4kjm = <sk> e e"
-		Listen(iotest.OneByteReader(strings.NewReader(TestMessage)))
-		return nil
+		return Listen(iotest.OneByteReader(strings.NewReader(TestMessage)))
 	}
 
 	//If portname "auto" was specified, we scan for the Morserino port
 	if strings.ToUpper(morserinoPortName) == "AUTO" {
-		portName, err := Get_MorserinoPort_automatically(genericEnumPorts)
+		portName, err := DetectDevice(genericEnumPorts)
 		if err != nil {
 			return err
 		}
@@ -76,12 +72,17 @@ func Listen_console(morserinoPortName string, genericEnumPorts comPortEnumerator
 
 // Main receive loop
 func Listen(port io.Reader) error {
+
 	//TODO: needs to be moved as a goroutine
 	consoleDisplay := morserino_console.ConsoleDisplay{}
 
-	var closeKey string
-	possibleExitRequest := false
-	closeRequested := false
+	// variables for tracking the exit pattern
+	var (
+		closeKey            string
+		possibleExitRequest bool
+		closeRequested      bool
+	)
+
 	buff := make([]byte, 100)
 	for {
 		// Reads up to 100 bytes
@@ -126,7 +127,7 @@ func Listen(port io.Reader) error {
 }
 
 // Tries to auto detect the Morserino port
-func Get_MorserinoPort_automatically(genericEnumPorts comPortEnumerator) (string, error) {
+func DetectDevice(genericEnumPorts comPortEnumerator) (string, error) {
 	theComPortList, err := Get_com_list(genericEnumPorts)
 	if err != nil {
 		return "", err

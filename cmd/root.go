@@ -23,8 +23,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/spf13/cobra"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
@@ -50,7 +51,7 @@ For easy reading, a new line is inserted after a "=" sign.
 	// Run: func(cmd *cobra.Command, args []string) { },
 	// Run: func(cmd *cobra.Command, args []string) {
 	// 	//Displaying on console is de default behaviour
-	// 	morserino_com.Listen_console(morserinoPortName)
+	// 	morserino_com.ConsoleListen(morserinoPortName)
 	// },
 }
 
