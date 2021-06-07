@@ -22,24 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-import (
-	"go.bug.st/serial"
-)
+import "go.bug.st/serial/enumerator"
 
-var genericOpenComPort openComPortInterface
-
-func init() {
-	genericOpenComPort = openComPort{}
+type mockPortEnumerator struct {
+	ports []*enumerator.PortDetails
+	err   error
 }
 
-//============
-
-type openComPortInterface interface {
-	Open(portName string, mode *serial.Mode) (serial.Port, error)
-}
-
-type openComPort struct{}
-
-func (r openComPort) Open(portName string, mode *serial.Mode) (serial.Port, error) {
-	return serial.Open(portName, mode)
+func (e mockPortEnumerator) GetDetailedPortsList() ([]*enumerator.PortDetails, error) {
+	return e.ports, e.err
 }

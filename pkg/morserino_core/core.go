@@ -1,3 +1,5 @@
+package morserino_core
+
 /*
 Copyright © 2021 Jean-Marc Meessen, ON4KJM <on4kjm@gmail.com>
 
@@ -19,35 +21,31 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-package cmd
 
 import (
-	"github.com/on4kjm/morserino_display/pkg/morserino_core"
+	"fmt"
+	"log"
 
-	"github.com/spf13/cobra"
+	"github.com/on4kjm/morserino_display/pkg/morserino_com"
 )
 
-// listCmd represents the list command
-var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "Displays the available ports",
-	Long: `Displays the ports available on the system.
-	`,
-	Run: func(cmd *cobra.Command, args []string) {
-		morserino_core.Morserino_list()
-	},
+// Main entry point for console output
+func Morserino_console(morserinoPortName string) {
+	// Setting up the EnumPorts to the "real life" implementation
+	var realEnumPorts morserino_com.EnumeratePorts
+
+	morserino_com.ConsoleListen(morserinoPortName, realEnumPorts)
 }
 
-func init() {
-	rootCmd.AddCommand(listCmd)
+//Main entry point for listing ports
+func Morserino_list() {
+	//We are going to use the real function to enumerate ports
+	var realEnumPorts morserino_com.EnumeratePorts
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// listCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	//Get the pretty printed list of devices
+	output, err := morserino_com.List_com(realEnumPorts)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(output)
 }

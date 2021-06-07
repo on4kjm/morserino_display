@@ -1,4 +1,4 @@
-module morserino_display
+module github.com/on4kjm/morserino_display
 
 go 1.16
 
