@@ -61,5 +61,13 @@ See also [Create a CLI in golang with Cobra](https://codesource.io/create-a-cli-
 * [Think Differently About What to Log in Go: Best Practices Examined](https://www.loggly.com/blog/think-differently-about-what-to-log-in-go-best-practices-examined/)
 * [How to Design a Basic Logging System in Your Go Application](https://betterprogramming.pub/understanding-and-designing-logging-system-in-go-application-c85a28bb8526)
 
+## Go Routines and channels
+### Stopping
+* [Stopping Goroutines](https://medium.com/@matryer/stopping-goroutines-golang-1bf28799c1cb), 2015
+* [How to kill execution of goroutine?](https://www.golangprograms.com/how-to-kill-execution-of-goroutine.html)
+* [Go - graceful shutdown of worker goroutines](https://callistaenterprise.se/blogg/teknik/2019/10/05/go-worker-cancellation/), 2019
+* [Stopping goroutines](https://riptutorial.com/go/example/6055/stopping-goroutines)
+* [Never start a goroutine without knowing how it will stop](https://dave.cheney.net/2016/12/22/never-start-a-goroutine-without-knowing-how-it-will-stop), Dave Cheney, 2016
+
 ## Miscelaneous
 * [Buy Me a Coffe badge](https://gist.github.com/gbraad/216f8162d9b382d14b8a097a37cc2c72#file-readme-md)
