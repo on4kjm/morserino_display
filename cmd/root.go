@@ -51,7 +51,7 @@ For easy reading, a new line is inserted after a "=" sign.
 	// Run: func(cmd *cobra.Command, args []string) { },
 	// Run: func(cmd *cobra.Command, args []string) {
 	// 	//Displaying on console is de default behaviour
-	// 	morserino_com.ConsoleListen(morserinoPortName)
+	// 	morserino_com.Listen(morserinoPortName)
 	// },
 }
 

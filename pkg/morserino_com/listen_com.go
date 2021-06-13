@@ -29,17 +29,18 @@ import (
 	"strings"
 	"testing/iotest"
 
-	"github.com/on4kjm/morserino_display/pkg/morserino_console"
 	"go.bug.st/serial"
 )
 
+const exitString string = "\nExiting...\n"
+
 // Main listen function with display to the console
-func ConsoleListen(morserinoPortName string, genericEnumPorts comPortEnumerator) error {
+func OpenAndListen(morserinoPortName string, genericEnumPorts comPortEnumerator, MessageBuffer chan string) error {
 
 	//If requested, use the simulator instead of a real Morserino
 	if strings.HasPrefix("SIMULATOR", strings.ToUpper(morserinoPortName)) {
 		TestMessage := "cq cq de on4kjm on4kjm = tks fer call om = ur rst 599 = hw? \n73 de on4kjm = <sk> e e"
-		return Listen(iotest.OneByteReader(strings.NewReader(TestMessage)))
+		return Listen(iotest.OneByteReader(strings.NewReader(TestMessage)), MessageBuffer)
 	}
 
 	//If portname "auto" was specified, we scan for the Morserino port
@@ -67,14 +68,14 @@ func ConsoleListen(morserinoPortName string, genericEnumPorts comPortEnumerator)
 	}
 	defer p.Close()
 
-	return Listen(p)
+	return Listen(p, MessageBuffer)
 }
 
 // Main receive loop
-func Listen(port io.Reader) error {
+func Listen(port io.Reader, MessageBuffer chan string) error {
 
-	//TODO: needs to be moved as a goroutine
-	consoleDisplay := morserino_console.ConsoleDisplay{}
+	// //TODO: needs to be moved as a goroutine
+	// consoleDisplay := morserino_console.ConsoleDisplay{}
 
 	// variables for tracking the exit pattern
 	var (
@@ -114,11 +115,11 @@ func Listen(port io.Reader) error {
 			break
 		}
 
-		// TODO: move this out and use a channel for that
-		consoleDisplay.Add(string(buff[:n]))
+		MessageBuffer <- string(buff[:n])
 
 		if closeRequested {
-			consoleDisplay.Add("\nExiting...\n")
+			//FIXME: This shoudl be a constant
+			MessageBuffer <- exitString
 			break
 		}
 	}
@@ -126,7 +127,7 @@ func Listen(port io.Reader) error {
 	return nil
 }
 
-// Tries to auto detect the Morserino port
+// Tries to auto detect the Morserino port based on the USB Vendor and Device ID
 func DetectDevice(genericEnumPorts comPortEnumerator) (string, error) {
 	theComPortList, err := Get_com_list(genericEnumPorts)
 	if err != nil {

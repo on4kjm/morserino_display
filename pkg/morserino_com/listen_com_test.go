@@ -2,10 +2,12 @@ package morserino_com
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"testing"
 	"testing/iotest"
 
+	"github.com/on4kjm/morserino_display/pkg/safebuffer"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.bug.st/serial/enumerator"
@@ -77,47 +79,79 @@ func TestDetectDevice_PortEnumerationWentWrong(t *testing.T) {
 
 func TestListen_HappyCase(t *testing.T) {
 	// Given
-	mock := iotest.OneByteReader(strings.NewReader("Test = test <sk> e e"))
+	testMsg := "Test = test <sk> e e"
+	mock := iotest.OneByteReader(strings.NewReader(testMsg))
+	var MessageBuffer = make(chan string, 10)
+	var testBuffer safebuffer.Buffer
 
 	// When
-	err := Listen(mock)
+	// Starts listener function so that we can check what has been actually received
+	go MockListener(MessageBuffer, &testBuffer)
+	err := Listen(mock, MessageBuffer)
 
 	// Then
 	require.NoError(t, err)
+	assert.Equal(t, testBuffer.String(), testMsg + exitString)
 }
 
 func TestListen_missedEndMarker(t *testing.T) {
 	// Given
-	mock := iotest.OneByteReader(strings.NewReader("Test = test <skaaa <sk> e e"))
+	testMsg := "Test = test <skaaa <sk> e e"
+	mock := iotest.OneByteReader(strings.NewReader(testMsg))
+	var MessageBuffer = make(chan string, 10)
+	var testBuffer safebuffer.Buffer
+
 
 	// When
-	err := Listen(mock)
+	// Starts listener function so that we can check what has been actually received
+	go MockListener(MessageBuffer, &testBuffer)
+	err := Listen(mock, MessageBuffer)
 
 	// Then
 	require.NoError(t, err)
+	assert.Equal(t, testMsg + exitString, testBuffer.String())
 }
 
 //EOF error (no error but no data returned)
 func TestListen_EOF(t *testing.T) {
 	// Given
 	mock := iotest.ErrReader(nil)
+	var MessageBuffer = make(chan string, 10)
 
 	// When
-	err := Listen(mock)
+	err := Listen(mock, MessageBuffer)
 
 	// Then
 	require.NoError(t, err)
 }
 
 //
-// Test ConsoleListen()
+// Test Listen()
 //
-func TestConsoleListen_withSimulator(t *testing.T) {
+func TestListen_withSimulator(t *testing.T) {
 	// Given
+	var MessageBuffer = make(chan string, 10)
 
 	// When
-	err := ConsoleListen("simul", nil)
+	err := OpenAndListen("simul", nil, MessageBuffer)
 
 	// Then
 	require.NoError(t, err)
+}
+
+func MockListener(MessageBuffer chan string, workBuffer *safebuffer.Buffer) {
+
+	for {
+		var output string
+		output = <-MessageBuffer
+		_, err := workBuffer.Write([]byte(output))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if strings.Contains(output, "\nExiting...\n") {
+			return
+		}
+	}
+
 }
