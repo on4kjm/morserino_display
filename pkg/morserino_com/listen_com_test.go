@@ -82,12 +82,13 @@ func TestListen_HappyCase(t *testing.T) {
 	testMsg := "Test = test <sk> e e"
 	mock := iotest.OneByteReader(strings.NewReader(testMsg))
 	var MessageBuffer = make(chan string, 10)
+	var DisplayCompleted = make(chan bool)
 	var testBuffer safebuffer.Buffer
 
 	// When
 	// Starts listener function so that we can check what has been actually received
-	go MockListener(MessageBuffer, &testBuffer)
-	err := Listen(mock, MessageBuffer)
+	go MockListener(MessageBuffer, DisplayCompleted, &testBuffer)
+	err := Listen(mock, MessageBuffer, DisplayCompleted)
 
 	// Then
 	require.NoError(t, err)
@@ -99,13 +100,14 @@ func TestListen_missedEndMarker(t *testing.T) {
 	testMsg := "Test = test <skaaa <sk> e e"
 	mock := iotest.OneByteReader(strings.NewReader(testMsg))
 	var MessageBuffer = make(chan string, 10)
+	var DisplayCompleted = make(chan bool)
 	var testBuffer safebuffer.Buffer
 
 
 	// When
 	// Starts listener function so that we can check what has been actually received
-	go MockListener(MessageBuffer, &testBuffer)
-	err := Listen(mock, MessageBuffer)
+	go MockListener(MessageBuffer, DisplayCompleted, &testBuffer)
+	err := Listen(mock, MessageBuffer, DisplayCompleted)
 
 	// Then
 	require.NoError(t, err)
@@ -117,9 +119,13 @@ func TestListen_EOF(t *testing.T) {
 	// Given
 	mock := iotest.ErrReader(nil)
 	var MessageBuffer = make(chan string, 10)
+	var DisplayCompleted = make(chan bool)
+
+	//FIXME:
+	//DisplayCompleted <- true
 
 	// When
-	err := Listen(mock, MessageBuffer)
+	err := Listen(mock, MessageBuffer, DisplayCompleted)
 
 	// Then
 	require.NoError(t, err)
@@ -130,16 +136,22 @@ func TestListen_EOF(t *testing.T) {
 //
 func TestListen_withSimulator(t *testing.T) {
 	// Given
+	testMsg := "cq cq de on4kjm on4kjm = tks fer call om = ur rst 599 = hw? \n73 de on4kjm = <sk> e e"
 	var MessageBuffer = make(chan string, 10)
+	var DisplayCompleted = make(chan bool)
+	var testBuffer safebuffer.Buffer
 
 	// When
-	err := OpenAndListen("simul", nil, MessageBuffer)
+	// Starts listener function so that we can check what has been actually received
+	go MockListener(MessageBuffer, DisplayCompleted, &testBuffer)
+	err := OpenAndListen("simul", nil, MessageBuffer, DisplayCompleted)
 
 	// Then
 	require.NoError(t, err)
+	assert.Equal(t, testBuffer.String(), testMsg + exitString)
 }
 
-func MockListener(MessageBuffer chan string, workBuffer *safebuffer.Buffer) {
+func MockListener(MessageBuffer chan string, DisplayCompleted chan bool, workBuffer *safebuffer.Buffer) {
 
 	for {
 		var output string
@@ -150,6 +162,7 @@ func MockListener(MessageBuffer chan string, workBuffer *safebuffer.Buffer) {
 		}
 
 		if strings.Contains(output, "\nExiting...\n") {
+			DisplayCompleted <- true
 			return
 		}
 	}

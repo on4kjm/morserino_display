@@ -35,12 +35,12 @@ import (
 const exitString string = "\nExiting...\n"
 
 // Main listen function with display to the console
-func OpenAndListen(morserinoPortName string, genericEnumPorts comPortEnumerator, MessageBuffer chan string) error {
+func OpenAndListen(morserinoPortName string, genericEnumPorts comPortEnumerator, MessageBuffer chan string, DisplayCompleted chan bool) error {
 
 	//If requested, use the simulator instead of a real Morserino
 	if strings.HasPrefix("SIMULATOR", strings.ToUpper(morserinoPortName)) {
 		TestMessage := "cq cq de on4kjm on4kjm = tks fer call om = ur rst 599 = hw? \n73 de on4kjm = <sk> e e"
-		return Listen(iotest.OneByteReader(strings.NewReader(TestMessage)), MessageBuffer)
+		return Listen(iotest.OneByteReader(strings.NewReader(TestMessage)), MessageBuffer, DisplayCompleted)
 	}
 
 	//If portname "auto" was specified, we scan for the Morserino port
@@ -68,11 +68,11 @@ func OpenAndListen(morserinoPortName string, genericEnumPorts comPortEnumerator,
 	}
 	defer p.Close()
 
-	return Listen(p, MessageBuffer)
+	return Listen(p, MessageBuffer, DisplayCompleted)
 }
 
 // Main receive loop
-func Listen(port io.Reader, MessageBuffer chan string) error {
+func Listen(port io.Reader, MessageBuffer chan string, DisplayCompleted chan bool) error {
 
 	// //TODO: needs to be moved as a goroutine
 	// consoleDisplay := morserino_console.ConsoleDisplay{}
@@ -112,14 +112,17 @@ func Listen(port io.Reader, MessageBuffer chan string) error {
 
 		if n == 0 {
 			fmt.Println("\nEOF")
+			//FIXME: handle this although it will never occur in real life 
 			break
 		}
 
 		MessageBuffer <- string(buff[:n])
 
 		if closeRequested {
-			//FIXME: This shoudl be a constant
+			//sending the exit marker to the diplay goroutine
 			MessageBuffer <- exitString
+			//waiting for it to complete (blocking read)
+			<- DisplayCompleted
 			break
 		}
 	}

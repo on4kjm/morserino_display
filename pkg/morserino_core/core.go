@@ -34,11 +34,12 @@ func Morserino_console(morserinoPortName string) {
 
 	// String channel used to communicate with the display routines
 	var MessageBuffer = make(chan string, 10)
+	var DisplayCompleted = make(chan bool)
 
 	// Setting up the EnumPorts to the "real life" implementation
 	var realEnumPorts morserino_com.EnumeratePorts
 
-	morserino_com.OpenAndListen(morserinoPortName, realEnumPorts, MessageBuffer)
+	morserino_com.OpenAndListen(morserinoPortName, realEnumPorts, MessageBuffer, DisplayCompleted)
 }
 
 //Main entry point for listing ports
