@@ -117,18 +117,19 @@ func TestListen_missedEndMarker(t *testing.T) {
 //EOF error (no error but no data returned)
 func TestListen_EOF(t *testing.T) {
 	// Given
+	testMsg := "\nEOF"
 	mock := iotest.ErrReader(nil)
 	var MessageBuffer = make(chan string, 10)
 	var DisplayCompleted = make(chan bool)
-
-	//FIXME:
-	//DisplayCompleted <- true
+	var testBuffer safebuffer.Buffer
 
 	// When
+	go MockListener(MessageBuffer, DisplayCompleted, &testBuffer)
 	err := Listen(mock, MessageBuffer, DisplayCompleted)
 
 	// Then
 	require.NoError(t, err)
+	assert.Equal(t, testMsg + exitString, testBuffer.String())
 }
 
 //

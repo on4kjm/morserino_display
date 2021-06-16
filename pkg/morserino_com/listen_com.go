@@ -112,7 +112,11 @@ func Listen(port io.Reader, MessageBuffer chan string, DisplayCompleted chan boo
 
 		if n == 0 {
 			fmt.Println("\nEOF")
-			//FIXME: handle this although it will never occur in real life 
+			MessageBuffer <- "\nEOF"
+			//sending the exit marker to the diplay goroutine
+			MessageBuffer <- exitString
+			//waiting for it to complete (blocking read)
+			<- DisplayCompleted
 			break
 		}
 
