@@ -24,26 +24,47 @@ THE SOFTWARE.
 
 import (
 	"fmt"
+	"io"
 	"strings"
+
+	"github.com/on4kjm/morserino_display/pkg/morserino_channels"
 )
+
+func ConsoleDisplayListener(mc morserino_channels.MorserinoChannels) {
+	var display ConsoleDisplay
+	for {
+		var output string
+		output = <- mc.MessageBuffer
+		display.Add(output)
+
+		if strings.Contains(output, "\nExiting...\n") {
+			mc.DisplayCompleted <- true
+			return
+		}
+	}
+}
 
 //FIXME: Add comment
 type ConsoleDisplay struct {
-	currentLine string
+	currentLine strings.Builder
 	newLine     string
+	w           io.Writer
 }
 
 func (cd *ConsoleDisplay) String() string {
 	//FIXME: add something useful here
-	return ""
+	return cd.currentLine.String()
 }
 
 func (cd *ConsoleDisplay) Add(buff string) {
 	if strings.Contains(buff, "=") {
-		//FIXME: is the buffer one char long
+		//FIXME: is the buffer one char long? It is generally followed by a space
 		fmt.Println("=")
+		//FIXME: better string accumulation
+		cd.currentLine.WriteString("=\n")
 	} else {
 		fmt.Printf("%s", buff)
+		cd.currentLine.WriteString(buff)
 	}
 }
 

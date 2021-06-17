@@ -29,18 +29,19 @@ import (
 	"strings"
 	"testing/iotest"
 
+	"github.com/on4kjm/morserino_display/pkg/morserino_channels"
 	"go.bug.st/serial"
 )
 
 const exitString string = "\nExiting...\n"
 
 // Main listen function with display to the console
-func OpenAndListen(morserinoPortName string, genericEnumPorts comPortEnumerator, MessageBuffer chan string, DisplayCompleted chan bool) error {
+func OpenAndListen(morserinoPortName string, genericEnumPorts comPortEnumerator, channels morserino_channels.MorserinoChannels) error {
 
 	//If requested, use the simulator instead of a real Morserino
 	if strings.HasPrefix("SIMULATOR", strings.ToUpper(morserinoPortName)) {
 		TestMessage := "cq cq de on4kjm on4kjm = tks fer call om = ur rst 599 = hw? \n73 de on4kjm = <sk> e e"
-		return Listen(iotest.OneByteReader(strings.NewReader(TestMessage)), MessageBuffer, DisplayCompleted)
+		return Listen(iotest.OneByteReader(strings.NewReader(TestMessage)), channels)
 	}
 
 	//If portname "auto" was specified, we scan for the Morserino port
@@ -68,11 +69,11 @@ func OpenAndListen(morserinoPortName string, genericEnumPorts comPortEnumerator,
 	}
 	defer p.Close()
 
-	return Listen(p, MessageBuffer, DisplayCompleted)
+	return Listen(p, channels)
 }
 
 // Main receive loop
-func Listen(port io.Reader, MessageBuffer chan string, DisplayCompleted chan bool) error {
+func Listen(port io.Reader, channels morserino_channels.MorserinoChannels) error {
 
 	// //TODO: needs to be moved as a goroutine
 	// consoleDisplay := morserino_console.ConsoleDisplay{}
@@ -112,21 +113,21 @@ func Listen(port io.Reader, MessageBuffer chan string, DisplayCompleted chan boo
 
 		if n == 0 {
 			fmt.Println("\nEOF")
-			MessageBuffer <- "\nEOF"
+			channels.MessageBuffer <- "\nEOF"
 			//sending the exit marker to the diplay goroutine
-			MessageBuffer <- exitString
+			channels.MessageBuffer <- exitString
 			//waiting for it to complete (blocking read)
-			<- DisplayCompleted
+			<-channels.DisplayCompleted
 			break
 		}
 
-		MessageBuffer <- string(buff[:n])
+		channels.MessageBuffer <- string(buff[:n])
 
 		if closeRequested {
 			//sending the exit marker to the diplay goroutine
-			MessageBuffer <- exitString
+			channels.MessageBuffer <- exitString
 			//waiting for it to complete (blocking read)
-			<- DisplayCompleted
+			<-channels.DisplayCompleted
 			break
 		}
 	}

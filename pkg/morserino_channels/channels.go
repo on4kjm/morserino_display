@@ -1,4 +1,4 @@
-package morserino_core
+package morserino_channels
 
 /*
 Copyright © 2021 Jean-Marc Meessen, ON4KJM <on4kjm@gmail.com>
@@ -22,37 +22,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-import (
-	"fmt"
-	"log"
+// Structure containing all the channels used by the application
+type MorserinoChannels struct {
+	// Channel for the data flow from serial port to display goroutines
+	MessageBuffer chan string
 
-	"github.com/on4kjm/morserino_display/pkg/morserino_channels"
-	"github.com/on4kjm/morserino_display/pkg/morserino_com"
-)
+	// Channel indicating that all data has been displayed and that the 
+	// application can be closed
+	DisplayCompleted chan bool
 
-// Main entry point for console output
-func Morserino_console(morserinoPortName string) {
-
-	// initialize the structure containing all the channels we are going to use
-	var channels morserino_channels.MorserinoChannels
-	channels.Init()
-
-
-	// Setting up the EnumPorts to the "real life" implementation
-	var realEnumPorts morserino_com.EnumeratePorts
-
-	morserino_com.OpenAndListen(morserinoPortName, realEnumPorts, channels)
+	// Channel used to report back errors in goroutines
+	Error chan error 
 }
 
-//Main entry point for listing ports
-func Morserino_list() {
-	//We are going to use the real function to enumerate ports
-	var realEnumPorts morserino_com.EnumeratePorts
-
-	//Get the pretty printed list of devices
-	output, err := morserino_com.List_com(realEnumPorts)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(output)
+//Initialize the channels
+func (mc MorserinoChannels) Init() {
+	mc.MessageBuffer = make(chan string, 10)
+	mc.DisplayCompleted = make(chan bool)
+	mc.Error = make(chan error)
 }
