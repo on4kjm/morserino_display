@@ -23,15 +23,16 @@ THE SOFTWARE.
 */
 
 import (
+	"bufio"
 	"fmt"
-	"io"
+	// "io"
 	"log"
 	"strings"
 
 	"github.com/on4kjm/morserino_display/pkg/morserino_channels"
 )
 
-func ConsoleDisplayListener(mc *morserino_channels.MorserinoChannels, outputStream io.Writer) {
+func ConsoleDisplayListener(mc *morserino_channels.MorserinoChannels, outputStream *bufio.Writer) {
 	display := &ConsoleDisplay{}
 	display.w = outputStream
 
@@ -52,7 +53,7 @@ type ConsoleDisplay struct {
 	currentLine strings.Builder
 	newLine     string
 	// output writer
-	w io.Writer
+	w *bufio.Writer
 }
 
 func (cd *ConsoleDisplay) String() string {
@@ -68,9 +69,8 @@ func (cd *ConsoleDisplay) Add(buff string) {
 		//FIXME: better string accumulation
 		cd.currentLine.WriteString("=\n")
 	} else {
-		fmt.Printf( "%s", buff)
 		_, err := fmt.Fprintf(cd.w, "%s", buff)
-		if(err != nil) {
+		if err != nil {
 			log.Fatal("Error writing to file: ", err)
 		}
 		cd.currentLine.WriteString(buff)

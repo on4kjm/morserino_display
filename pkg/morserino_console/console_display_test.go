@@ -26,17 +26,20 @@ func TestConsoleDisplayListener_happyCase(t *testing.T) {
 
 	w := bufio.NewWriter(f)
 
-
 	// ** When
-	go 	serialListenerMock(testMsg, mc)
+	go serialListenerMock(testMsg, mc)
 	go ConsoleDisplayListener(mc, w)
-
 
 	<-mc.Done
 
 	// ** Then
 	// fmt.Println(buff.String())
-	assert.True(t,false)
+	w.Flush()
+	fi, err := f.Stat()
+	assert.NoError(t, err)
+	var zero int64
+	zero = 0
+	assert.Greater(t, fi.Size(), zero)
 
 }
 
