@@ -34,9 +34,8 @@ import (
 func Morserino_console(morserinoPortName string) {
 
 	// initialize the structure containing all the channels we are going to use
-	var channels morserino_channels.MorserinoChannels
+	channels := &morserino_channels.MorserinoChannels{}
 	channels.Init()
-
 
 	// Setting up the EnumPorts to the "real life" implementation
 	var realEnumPorts morserino_com.EnumeratePorts

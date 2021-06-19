@@ -83,9 +83,8 @@ func TestListen_HappyCase(t *testing.T) {
 	testMsg := "Test = test <sk> e e"
 	mock := iotest.OneByteReader(strings.NewReader(testMsg))
 	var testBuffer safebuffer.Buffer
-	var mc morserino_channels.MorserinoChannels
+	mc := &morserino_channels.MorserinoChannels{}
 	mc.Init()
-
 
 	// When
 	// Starts listener function so that we can check what has been actually received
@@ -102,7 +101,7 @@ func TestListen_missedEndMarker(t *testing.T) {
 	testMsg := "Test = test <skaaa <sk> e e"
 	mock := iotest.OneByteReader(strings.NewReader(testMsg))
 	var testBuffer safebuffer.Buffer
-	var mc morserino_channels.MorserinoChannels
+	mc := &morserino_channels.MorserinoChannels{}
 	mc.Init()
 
 	// When
@@ -121,9 +120,8 @@ func TestListen_EOF(t *testing.T) {
 	testMsg := "\nEOF"
 	mock := iotest.ErrReader(nil)
 	var testBuffer safebuffer.Buffer
-	var mc morserino_channels.MorserinoChannels
+	mc := &morserino_channels.MorserinoChannels{}
 	mc.Init()
-
 
 	// When
 	go MockListener(mc, &testBuffer)
@@ -141,7 +139,7 @@ func TestListen_withSimulator(t *testing.T) {
 	// Given
 	testMsg := "cq cq de on4kjm on4kjm = tks fer call om = ur rst 599 = hw? \n73 de on4kjm = <sk> e e"
 	var testBuffer safebuffer.Buffer
-	var mc morserino_channels.MorserinoChannels
+	mc := &morserino_channels.MorserinoChannels{}
 	mc.Init()
 
 	// When
@@ -154,11 +152,11 @@ func TestListen_withSimulator(t *testing.T) {
 	assert.Equal(t, testBuffer.String(), testMsg+exitString)
 }
 
-func MockListener(mc morserino_channels.MorserinoChannels, workBuffer *safebuffer.Buffer) {
+func MockListener(mc *morserino_channels.MorserinoChannels, workBuffer *safebuffer.Buffer) {
 
 	for {
 		var output string
-		output = <- mc.MessageBuffer
+		output = <-mc.MessageBuffer
 		_, err := workBuffer.Write([]byte(output))
 		if err != nil {
 			log.Fatal(err)

@@ -25,16 +25,19 @@ THE SOFTWARE.
 import (
 	"fmt"
 	"io"
+	"log"
 	"strings"
 
 	"github.com/on4kjm/morserino_display/pkg/morserino_channels"
 )
 
-func ConsoleDisplayListener(mc morserino_channels.MorserinoChannels) {
-	var display ConsoleDisplay
+func ConsoleDisplayListener(mc *morserino_channels.MorserinoChannels, outputStream io.Writer) {
+	display := &ConsoleDisplay{}
+	display.w = outputStream
+
 	for {
 		var output string
-		output = <- mc.MessageBuffer
+		output = <-mc.MessageBuffer
 		display.Add(output)
 
 		if strings.Contains(output, "\nExiting...\n") {
@@ -48,7 +51,8 @@ func ConsoleDisplayListener(mc morserino_channels.MorserinoChannels) {
 type ConsoleDisplay struct {
 	currentLine strings.Builder
 	newLine     string
-	w           io.Writer
+	// output writer
+	w io.Writer
 }
 
 func (cd *ConsoleDisplay) String() string {
@@ -57,13 +61,18 @@ func (cd *ConsoleDisplay) String() string {
 }
 
 func (cd *ConsoleDisplay) Add(buff string) {
+	// log.Println("ConsoleDisplay output ", cd.w)
 	if strings.Contains(buff, "=") {
 		//FIXME: is the buffer one char long? It is generally followed by a space
-		fmt.Println("=")
+		fmt.Fprintln(cd.w, "=")
 		//FIXME: better string accumulation
 		cd.currentLine.WriteString("=\n")
 	} else {
-		fmt.Printf("%s", buff)
+		fmt.Printf( "%s", buff)
+		_, err := fmt.Fprintf(cd.w, "%s", buff)
+		if(err != nil) {
+			log.Fatal("Error writing to file: ", err)
+		}
 		cd.currentLine.WriteString(buff)
 	}
 }

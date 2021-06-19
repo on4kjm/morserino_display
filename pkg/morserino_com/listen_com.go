@@ -36,7 +36,7 @@ import (
 const exitString string = "\nExiting...\n"
 
 // Main listen function with display to the console
-func OpenAndListen(morserinoPortName string, genericEnumPorts comPortEnumerator, channels morserino_channels.MorserinoChannels) error {
+func OpenAndListen(morserinoPortName string, genericEnumPorts comPortEnumerator, channels *morserino_channels.MorserinoChannels) error {
 
 	//If requested, use the simulator instead of a real Morserino
 	if strings.HasPrefix("SIMULATOR", strings.ToUpper(morserinoPortName)) {
@@ -73,7 +73,7 @@ func OpenAndListen(morserinoPortName string, genericEnumPorts comPortEnumerator,
 }
 
 // Main receive loop
-func Listen(port io.Reader, channels morserino_channels.MorserinoChannels) error {
+func Listen(port io.Reader, channels *morserino_channels.MorserinoChannels) error {
 
 	// //TODO: needs to be moved as a goroutine
 	// consoleDisplay := morserino_console.ConsoleDisplay{}
@@ -131,6 +131,7 @@ func Listen(port io.Reader, channels morserino_channels.MorserinoChannels) error
 			break
 		}
 	}
+	channels.Done <- true
 
 	return nil
 }

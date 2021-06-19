@@ -27,17 +27,20 @@ type MorserinoChannels struct {
 	// Channel for the data flow from serial port to display goroutines
 	MessageBuffer chan string
 
-	// Channel indicating that all data has been displayed and that the 
+	// Channel indicating that all data has been displayed and that the
 	// application can be closed
 	DisplayCompleted chan bool
 
+	Done chan bool
+
 	// Channel used to report back errors in goroutines
-	Error chan error 
+	Error chan error
 }
 
 //Initialize the channels
-func (mc MorserinoChannels) Init() {
+func (mc *MorserinoChannels) Init() {
 	mc.MessageBuffer = make(chan string, 10)
 	mc.DisplayCompleted = make(chan bool)
+	mc.Done = make(chan bool)
 	mc.Error = make(chan error)
 }
