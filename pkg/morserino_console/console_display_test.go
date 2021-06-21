@@ -2,7 +2,7 @@ package morserino_console
 
 import (
 	"bufio"
-	// "log"
+	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -19,28 +19,33 @@ func TestConsoleDisplayListener_happyCase(t *testing.T) {
 	mc := &morserino_channels.MorserinoChannels{}
 	mc.Init()
 
-	f, err := os.Create("testfile.txt")
+	testFileName := "testfile.txt"
+	f, err := os.Create(testFileName)
 	assert.NoError(t, err)
 
 	defer f.Close()
 
 	w := bufio.NewWriter(f)
 
+	// f := bufio.NewWriter(os.Stdout)
+
 	// ** When
 	go serialListenerMock(testMsg, mc)
 	go ConsoleDisplayListener(mc, w)
 
-	<-mc.Done
+	<-mc.Done //Waiting here for everything to be orderly completed
+
+	w.Flush() //Just to be sure everything is written to disk
 
 	// ** Then
-	// fmt.Println(buff.String())
-	w.Flush()
-	fi, err := f.Stat()
+	b, err := ioutil.ReadFile(testFileName)
 	assert.NoError(t, err)
-	var zero int64
-	zero = 0
-	assert.Greater(t, fi.Size(), zero)
 
+	expectedOutput := "Test =\n test <skaaa <sk> e e\nExiting...\n"
+	assert.Equal(t, expectedOutput, string(b))
+
+	deleteErr := os.Remove(testFileName)
+	assert.NoError(t, deleteErr)
 }
 
 // A mock to simulaate the serial port listener goroutine

@@ -23,11 +23,14 @@ THE SOFTWARE.
 */
 
 import (
+	"bufio"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/on4kjm/morserino_display/pkg/morserino_channels"
 	"github.com/on4kjm/morserino_display/pkg/morserino_com"
+	"github.com/on4kjm/morserino_display/pkg/morserino_console"
 )
 
 // Main entry point for console output
@@ -40,7 +43,10 @@ func Morserino_console(morserinoPortName string) {
 	// Setting up the EnumPorts to the "real life" implementation
 	var realEnumPorts morserino_com.EnumeratePorts
 
-	morserino_com.OpenAndListen(morserinoPortName, realEnumPorts, channels)
+	go morserino_com.OpenAndListen(morserinoPortName, realEnumPorts, channels)
+	go morserino_console.ConsoleDisplayListener(channels, bufio.NewWriter(os.Stdout))
+
+	<-channels.Done //Waiting here for everything to be orderly completed
 }
 
 //Main entry point for listing ports
