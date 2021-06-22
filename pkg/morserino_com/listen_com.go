@@ -25,13 +25,15 @@ THE SOFTWARE.
 import (
 	"fmt"
 	"io"
-	"log"
 	"strings"
 	"testing/iotest"
 
 	"github.com/on4kjm/morserino_display/pkg/morserino_channels"
+	"github.com/rs/zerolog"
 	"go.bug.st/serial"
 )
+
+var AppLogger zerolog.Logger
 
 const exitString string = "\nExiting...\n"
 
@@ -40,12 +42,14 @@ func OpenAndListen(morserinoPortName string, genericEnumPorts comPortEnumerator,
 
 	//If requested, use the simulator instead of a real Morserino
 	if strings.HasPrefix("SIMULATOR", strings.ToUpper(morserinoPortName)) {
+		AppLogger.Debug().Msg("Simulator mode listener")
 		TestMessage := "cq cq de on4kjm on4kjm = tks fer call om = ur rst 599 = hw? \n73 de on4kjm = <sk> e e"
 		return Listen(iotest.OneByteReader(strings.NewReader(TestMessage)), channels)
 	}
 
 	//If portname "auto" was specified, we scan for the Morserino port
 	if strings.ToUpper(morserinoPortName) == "AUTO" {
+		AppLogger.Debug().Msg("Tying to detect the morsorino port")
 		portName, err := DetectDevice(genericEnumPorts)
 		if err != nil {
 			return err
@@ -53,7 +57,7 @@ func OpenAndListen(morserinoPortName string, genericEnumPorts comPortEnumerator,
 		morserinoPortName = portName
 	}
 
-	log.Println("Listening to port \"" + morserinoPortName + "\"")
+	AppLogger.Info().Msg("Listening to port \"" + morserinoPortName + "\"")
 
 	//Port parameters for a Morserino
 	mode := &serial.Mode{
@@ -63,8 +67,10 @@ func OpenAndListen(morserinoPortName string, genericEnumPorts comPortEnumerator,
 		StopBits: serial.OneStopBit,
 	}
 
+	AppLogger.Debug().Msg("Trying to open " + morserinoPortName)
 	p, err := serial.Open(morserinoPortName, mode)
 	if err != nil {
+		AppLogger.Error().Err(err).Msg("Error opening port")
 		return err
 	}
 	defer p.Close()
@@ -90,7 +96,7 @@ func Listen(port io.Reader, channels *morserino_channels.MorserinoChannels) erro
 		// Reads up to 100 bytes
 		n, err := port.Read(buff)
 		if err != nil {
-			log.Fatal(err)
+			AppLogger.Error().Err(err).Msg("Error reading on port")
 		}
 
 		// Check whether the "end of transmission" was sent
@@ -112,12 +118,16 @@ func Listen(port io.Reader, channels *morserino_channels.MorserinoChannels) erro
 		}
 
 		if n == 0 {
-			fmt.Println("\nEOF")
+			AppLogger.Debug().Msg("EOF detectd")
+			AppLogger.Trace().Msg("Sending EOF to the console displayer")
 			channels.MessageBuffer <- "\nEOF"
 			//sending the exit marker to the diplay goroutine
+			AppLogger.Trace().Msg("Sending exit marker to the console displayer")
 			channels.MessageBuffer <- exitString
 			//waiting for it to complete (blocking read)
+			AppLogger.Debug().Msg("Waiting for the signal that the display processing was completed")
 			<-channels.DisplayCompleted
+			AppLogger.Debug().Msg("Display processing completed (received signal)")
 			break
 		}
 
@@ -125,14 +135,19 @@ func Listen(port io.Reader, channels *morserino_channels.MorserinoChannels) erro
 
 		if closeRequested {
 			//sending the exit marker to the diplay goroutine
+			AppLogger.Trace().Msg("Sending exit marker to the console displayer as we received the exit sequence")
 			channels.MessageBuffer <- exitString
 			//waiting for it to complete (blocking read)
+			AppLogger.Debug().Msg("Waiting for the signal that the display processing was completed")
 			<-channels.DisplayCompleted
+			AppLogger.Debug().Msg("Display processing completed (received signal)")
 			break
 		}
 	}
+	AppLogger.Debug().Msg("Sending signal that all processing is done")
 	channels.Done <- true
 
+	AppLogger.Debug().Msg("Exiting Listen")
 	return nil
 }
 

@@ -25,16 +25,23 @@ THE SOFTWARE.
 import (
 	"bufio"
 	"fmt"
+
+	// "os"
+
 	// "io"
-	"log"
 	"strings"
 
 	"github.com/on4kjm/morserino_display/pkg/morserino_channels"
+	"github.com/rs/zerolog"
 )
+
+var AppLogger zerolog.Logger
 
 func ConsoleDisplayListener(mc *morserino_channels.MorserinoChannels, outputStream *bufio.Writer) {
 	display := &ConsoleDisplay{}
 	display.w = outputStream
+
+	AppLogger.Debug().Msg("Entering Console Display Listener")
 
 	for {
 		var output string
@@ -43,9 +50,11 @@ func ConsoleDisplayListener(mc *morserino_channels.MorserinoChannels, outputStre
 
 		if strings.Contains(output, "\nExiting...\n") {
 			mc.DisplayCompleted <- true
+			AppLogger.Debug().Msg("Exiting Console Display Listener")
 			return
 		}
 	}
+
 }
 
 //FIXME: Add comment
@@ -71,7 +80,8 @@ func (cd *ConsoleDisplay) Add(buff string) {
 	} else {
 		_, err := fmt.Fprintf(cd.w, "%s", buff)
 		if err != nil {
-			log.Fatal("Error writing to file: ", err)
+			// log.Fatal("Error writing to file: ", err)
+			AppLogger.Error().Err(err).Msg("Error writing to file")
 		}
 		cd.currentLine.WriteString(buff)
 	}
