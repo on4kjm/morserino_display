@@ -32,25 +32,29 @@ import (
 	"go.bug.st/serial"
 )
 
-
 const exitString string = "\nExiting...\n"
 
 // Main listen function with display to the console
-func OpenAndListen(morserinoPortName string, genericEnumPorts comPortEnumerator, channels *MorserinoChannels) error {
+func OpenAndListen(morserinoPortName string, genericEnumPorts comPortEnumerator, channels *MorserinoChannels) {
 
 	//If requested, use the simulator instead of a real Morserino
 	if strings.HasPrefix("SIMULATOR", strings.ToUpper(morserinoPortName)) {
 		AppLogger.Debug().Msg("Simulator mode listener")
 		TestMessage := "cq cq de on4kjm on4kjm = tks fer call om = ur rst 599 = hw? \n73 de on4kjm = <sk> e e"
-		return Listen(iotest.OneByteReader(strings.NewReader(TestMessage)), channels)
+		err := Listen(iotest.OneByteReader(strings.NewReader(TestMessage)), channels)
+		channels.Error <- err
+		return 
 	}
 
 	//If portname "auto" was specified, we scan for the Morserino port
 	if strings.ToUpper(morserinoPortName) == "AUTO" {
 		AppLogger.Debug().Msg("Tying to detect the morsorino port")
 		portName, err := DetectDevice(genericEnumPorts)
+		channels.Error <- err
 		if err != nil {
-			return err
+			channels.MessageBuffer <- exitString
+			channels.Done <- true
+			return
 		}
 		morserinoPortName = portName
 	}
@@ -69,11 +73,14 @@ func OpenAndListen(morserinoPortName string, genericEnumPorts comPortEnumerator,
 	p, err := serial.Open(morserinoPortName, mode)
 	if err != nil {
 		AppLogger.Error().Err(err).Msg("Error opening port")
-		return err
+		channels.Error <- err
+		return
 	}
 	defer p.Close()
 
-	return Listen(p, channels)
+	err = Listen(p, channels)
+	channels.Error <- err
+	return 
 }
 
 // Main receive loop

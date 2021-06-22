@@ -69,8 +69,6 @@ func TestConsoleDisplayListener_happyCase(t *testing.T) {
 
 	deleteErr := os.Remove(testFileName)
 	assert.NoError(t, deleteErr)
-
-	assert.Equal(t, true, false)
 }
 
 // A mock to simulaate the serial port listener goroutine

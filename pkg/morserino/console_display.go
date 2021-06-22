@@ -30,9 +30,7 @@ import (
 
 	// "io"
 	"strings"
-
 )
-
 
 func ConsoleDisplayListener(mc *MorserinoChannels, outputStream *bufio.Writer) {
 	display := &ConsoleDisplay{}

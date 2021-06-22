@@ -42,5 +42,5 @@ func (mc *MorserinoChannels) Init() {
 	mc.MessageBuffer = make(chan string, 10)
 	mc.DisplayCompleted = make(chan bool)
 	mc.Done = make(chan bool)
-	mc.Error = make(chan error)
+	mc.Error = make(chan error, 10)
 }
