@@ -1,4 +1,4 @@
-package morserino_channels
+package morserino
 
 /*
 Copyright © 2021 Jean-Marc Meessen, ON4KJM <on4kjm@gmail.com>
@@ -22,25 +22,42 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-// Structure containing all the channels used by the application
-type MorserinoChannels struct {
-	// Channel for the data flow from serial port to display goroutines
-	MessageBuffer chan string
+import (
+	"bufio"
+	"fmt"
+	"log"
+	"os"
 
-	// Channel indicating that all data has been displayed and that the
-	// application can be closed
-	DisplayCompleted chan bool
+	"github.com/rs/zerolog"
+)
 
-	Done chan bool
+var AppLogger zerolog.Logger
 
-	// Channel used to report back errors in goroutines
-	Error chan error
+// Main entry point for console output
+func Morserino_console(morserinoPortName string) {
+
+	// initialize the structure containing all the channels we are going to use
+	channels := &MorserinoChannels{}
+	channels.Init()
+
+	// Setting up the EnumPorts to the "real life" implementation
+	var realEnumPorts EnumeratePorts
+
+	go OpenAndListen(morserinoPortName, realEnumPorts, channels)
+	go ConsoleDisplayListener(channels, bufio.NewWriter(os.Stdout))
+
+	<-channels.Done //Waiting here for everything to be orderly completed
 }
 
-//Initialize the channels
-func (mc *MorserinoChannels) Init() {
-	mc.MessageBuffer = make(chan string, 10)
-	mc.DisplayCompleted = make(chan bool)
-	mc.Done = make(chan bool)
-	mc.Error = make(chan error)
+//Main entry point for listing ports
+func Morserino_list() {
+	//We are going to use the real function to enumerate ports
+	var realEnumPorts EnumeratePorts
+
+	//Get the pretty printed list of devices
+	output, err := List_com(realEnumPorts)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(output)
 }

@@ -1,4 +1,4 @@
-package morserino_console
+package morserino
 
 import (
 	"bufio"
@@ -8,16 +8,14 @@ import (
 	"strings"
 	"testing"
 	"testing/iotest"
-	"time"
+	// "time"
 
-	"github.com/on4kjm/morserino_display/pkg/morserino_channels"
-	"github.com/on4kjm/morserino_display/pkg/morserino_com"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 )
 
 func init() {
-	output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
+	output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: "15:04:05.000"}
 	output.FormatLevel = func(i interface{}) string {
 		return strings.ToUpper(fmt.Sprintf("| %-6s|", i))
 	}
@@ -39,7 +37,7 @@ func TestConsoleDisplayListener_happyCase(t *testing.T) {
 
 	// ** Given
 	testMsg := "Test = test <skaaa <sk> e e"
-	mc := &morserino_channels.MorserinoChannels{}
+	mc := &MorserinoChannels{}
 	mc.Init()
 
 	//TODO: Create a temporary file in the temporary directory
@@ -76,7 +74,7 @@ func TestConsoleDisplayListener_happyCase(t *testing.T) {
 }
 
 // A mock to simulaate the serial port listener goroutine
-func serialListenerMock(TestString string, mc *morserino_channels.MorserinoChannels) {
-	morserino_com.Listen(iotest.OneByteReader(strings.NewReader(TestString)), mc)
+func serialListenerMock(TestString string, mc *MorserinoChannels) {
+	Listen(iotest.OneByteReader(strings.NewReader(TestString)), mc)
 	return
 }

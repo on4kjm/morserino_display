@@ -1,4 +1,4 @@
-package morserino_com
+package morserino
 
 /*
 Copyright © 2021 Jean-Marc Meessen, ON4KJM <on4kjm@gmail.com>
@@ -28,17 +28,15 @@ import (
 	"strings"
 	"testing/iotest"
 
-	"github.com/on4kjm/morserino_display/pkg/morserino_channels"
-	"github.com/rs/zerolog"
+	// "github.com/rs/zerolog"
 	"go.bug.st/serial"
 )
 
-var AppLogger zerolog.Logger
 
 const exitString string = "\nExiting...\n"
 
 // Main listen function with display to the console
-func OpenAndListen(morserinoPortName string, genericEnumPorts comPortEnumerator, channels *morserino_channels.MorserinoChannels) error {
+func OpenAndListen(morserinoPortName string, genericEnumPorts comPortEnumerator, channels *MorserinoChannels) error {
 
 	//If requested, use the simulator instead of a real Morserino
 	if strings.HasPrefix("SIMULATOR", strings.ToUpper(morserinoPortName)) {
@@ -79,7 +77,7 @@ func OpenAndListen(morserinoPortName string, genericEnumPorts comPortEnumerator,
 }
 
 // Main receive loop
-func Listen(port io.Reader, channels *morserino_channels.MorserinoChannels) error {
+func Listen(port io.Reader, channels *MorserinoChannels) error {
 
 	// //TODO: needs to be moved as a goroutine
 	// consoleDisplay := morserino_console.ConsoleDisplay{}

@@ -1,34 +1,33 @@
-package morserino_com
+package morserino
 
 import (
 	"fmt"
+	// "io/ioutil"
 	"os"
 	"strings"
 	"testing"
 	"testing/iotest"
-	"time"
 
-	"github.com/on4kjm/morserino_display/pkg/morserino_channels"
 	"github.com/on4kjm/morserino_display/pkg/safebuffer"
 	"github.com/rs/zerolog"
+	// "github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.bug.st/serial/enumerator"
 )
 
 func init() {
-	output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
-	output.FormatLevel = func(i interface{}) string {
-		return strings.ToUpper(fmt.Sprintf("| %-6s|", i))
-	}
+    // create a temp file
+    // tempFile, err := ioutil.TempFile(".","testLog")
+    // if err != nil {
+    //     // Can we log an error before we have our logger? :)
+    //     log.Error().Err(err).Msg("there was an error creating a temporary file four our log")
+    // }
 
-	output.FormatFieldName = func(i interface{}) string {
-		return fmt.Sprintf("%s:", i)
-	}
-	output.FormatFieldValue = func(i interface{}) string {
-		return strings.ToUpper(fmt.Sprintf("%s", i))
-	}
-	AppLogger = zerolog.New(output).With().Timestamp().Caller().Logger()
+	zerolog.TimeFieldFormat = "15:04:05.000"
+    AppLogger= zerolog.New(os.Stdout).With().Timestamp().Logger()
+
+    // fmt.Printf("The log file is allocated at %s\n", tempFile.Name())
 
 	zerolog.SetGlobalLevel(zerolog.TraceLevel)
 
@@ -99,17 +98,19 @@ func TestDetectDevice_PortEnumerationWentWrong(t *testing.T) {
 //
 
 func TestListen_HappyCase(t *testing.T) {
+	AppLogger.Info().Msg("==> " + t.Name())
+
 	// Given
 	testMsg := "Test = test <sk> e e"
 	mock := iotest.OneByteReader(strings.NewReader(testMsg))
 	var testBuffer safebuffer.Buffer
-	mc := &morserino_channels.MorserinoChannels{}
+	mc := &MorserinoChannels{}
 	mc.Init()
 
 	// When
 	// Starts listener function so that we can check what has been actually received
 	AppLogger.Debug().Msg("Starting the mock listener in the background")
-	go MockListener(mc, &testBuffer)
+	go MockMorserinoDisplayer(mc, &testBuffer)
 	AppLogger.Debug().Msg("Starting the Listen under test (with the mock port reader)")
 	//FIXME: How to receive errors
 	// err := Listen(mock, mc)
@@ -117,75 +118,99 @@ func TestListen_HappyCase(t *testing.T) {
 
 	AppLogger.Debug().Msg("Waiting for the done signal")
 	<-mc.Done
+	AppLogger.Debug().Msg("All is completed. Go Routines exited")
 
 	// Then
 	// require.NoError(t, err)
 	assert.Equal(t, testBuffer.String(), testMsg+exitString)
+
+	AppLogger.Info().Msg("<== " + t.Name())
 }
 
 func TestListen_missedEndMarker(t *testing.T) {
+	AppLogger.Info().Msg("==> " + t.Name())
+
 	// Given
 	testMsg := "Test = test <skaaa <sk> e e"
 	mock := iotest.OneByteReader(strings.NewReader(testMsg))
 	var testBuffer safebuffer.Buffer
-	mc := &morserino_channels.MorserinoChannels{}
+	mc := &MorserinoChannels{}
 	mc.Init()
 
 	// When
 	// Starts listener function so that we can check what has been actually received
 	AppLogger.Debug().Msg("Starting the mock listener in the background")
-	go MockListener(mc, &testBuffer)
+	go MockMorserinoDisplayer(mc, &testBuffer)
 	AppLogger.Debug().Msg("Starting the Listen under test (with the mock port reader)")
-	err := Listen(mock, mc)
+	go Listen(mock, mc)
+
+	AppLogger.Debug().Msg("Waiting for the done signal")
+	<-mc.Done
+	AppLogger.Debug().Msg("All is completed. Go Routines exited")
 
 	// Then
-	require.NoError(t, err)
 	assert.Equal(t, testMsg+exitString, testBuffer.String())
+
+	AppLogger.Info().Msg("<== " + t.Name())
 }
 
 //EOF error (no error but no data returned)
 func TestListen_EOF(t *testing.T) {
+	AppLogger.Info().Msg("==> " + t.Name())
+
 	// Given
 	testMsg := "\nEOF"
 	mock := iotest.ErrReader(nil)
 	var testBuffer safebuffer.Buffer
-	mc := &morserino_channels.MorserinoChannels{}
+	mc := &MorserinoChannels{}
 	mc.Init()
 
 	// When
 	AppLogger.Debug().Msg("Starting the mock listener in the background")
-	go MockListener(mc, &testBuffer)
+	go MockMorserinoDisplayer(mc, &testBuffer)
 	AppLogger.Debug().Msg("Starting the Listen under test (with the mock port reader)")
-	err := Listen(mock, mc)
+	go Listen(mock, mc)
+
+	AppLogger.Debug().Msg("Waiting for the done signal")
+	<-mc.Done
+	AppLogger.Debug().Msg("All is completed. Go Routines exited")
 
 	// Then
-	require.NoError(t, err)
 	assert.Equal(t, testMsg+exitString, testBuffer.String())
+
+	AppLogger.Info().Msg("<== " + t.Name())
 }
 
 //
 // Test Listen()
 //
 func TestListen_withSimulator(t *testing.T) {
+	AppLogger.Info().Msg("==> " + t.Name())
+
 	// Given
 	testMsg := "cq cq de on4kjm on4kjm = tks fer call om = ur rst 599 = hw? \n73 de on4kjm = <sk> e e"
 	var testBuffer safebuffer.Buffer
-	mc := &morserino_channels.MorserinoChannels{}
+	mc := &MorserinoChannels{}
 	mc.Init()
 
 	// When
 	// Starts listener function so that we can check what has been actually received
 	AppLogger.Debug().Msg("Starting the Listen under test (with the mock port reader)")
-	go MockListener(mc, &testBuffer)
+	go MockMorserinoDisplayer(mc, &testBuffer)
 	AppLogger.Debug().Msg("Starting the OpenAndListen() under test (with simulator)")
-	err := OpenAndListen("simul", nil, mc)
+	go OpenAndListen("simul", nil, mc)
+
+	AppLogger.Debug().Msg("Waiting for the done signal")
+	<-mc.Done
+	AppLogger.Debug().Msg("All is completed. Go Routines exited")
 
 	// Then
-	require.NoError(t, err)
 	assert.Equal(t, testBuffer.String(), testMsg+exitString)
+
+	AppLogger.Info().Msg("<== " + t.Name())
 }
 
-func MockListener(mc *morserino_channels.MorserinoChannels, workBuffer *safebuffer.Buffer) {
+func MockMorserinoDisplayer(mc *MorserinoChannels, workBuffer *safebuffer.Buffer) {
 
 	for {
 		var output string
@@ -196,10 +221,9 @@ func MockListener(mc *morserino_channels.MorserinoChannels, workBuffer *safebuff
 		}
 
 		if strings.Contains(output, "\nExiting...\n") {
-			AppLogger.Debug().Msg("Signaling that the display processing is complete")
+			AppLogger.Trace().Msg("MockMorserinoDisplayer: Signaling that the display processing is complete")
 			mc.DisplayCompleted <- true
 			return
 		}
 	}
-
 }

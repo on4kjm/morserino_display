@@ -1,4 +1,4 @@
-package morserino_console
+package morserino
 
 /*
 Copyright © 2021 Jean-Marc Meessen, ON4KJM <on4kjm@gmail.com>
@@ -31,13 +31,10 @@ import (
 	// "io"
 	"strings"
 
-	"github.com/on4kjm/morserino_display/pkg/morserino_channels"
-	"github.com/rs/zerolog"
 )
 
-var AppLogger zerolog.Logger
 
-func ConsoleDisplayListener(mc *morserino_channels.MorserinoChannels, outputStream *bufio.Writer) {
+func ConsoleDisplayListener(mc *MorserinoChannels, outputStream *bufio.Writer) {
 	display := &ConsoleDisplay{}
 	display.w = outputStream
 
@@ -83,6 +80,7 @@ func (cd *ConsoleDisplay) Add(buff string) {
 			// log.Fatal("Error writing to file: ", err)
 			AppLogger.Error().Err(err).Msg("Error writing to file")
 		}
+		cd.w.Flush()
 		cd.currentLine.WriteString(buff)
 	}
 }
