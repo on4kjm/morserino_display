@@ -43,7 +43,7 @@ func OpenAndListen(morserinoPortName string, genericEnumPorts comPortEnumerator,
 		TestMessage := "cq cq de on4kjm on4kjm = tks fer call om = ur rst 599 = hw? \n73 de on4kjm = <sk> e e"
 		err := Listen(iotest.OneByteReader(strings.NewReader(TestMessage)), channels)
 		channels.Error <- err
-		return 
+		return
 	}
 
 	//If portname "auto" was specified, we scan for the Morserino port
@@ -80,7 +80,7 @@ func OpenAndListen(morserinoPortName string, genericEnumPorts comPortEnumerator,
 
 	err = Listen(p, channels)
 	channels.Error <- err
-	return 
+	return
 }
 
 // Main receive loop

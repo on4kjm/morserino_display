@@ -34,6 +34,7 @@ var listCmd = &cobra.Command{
 	Long: `Displays the ports available on the system.
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
+		morserino.SetupLogger(morserinoDebugLevel, morserinoDebugFilename)
 		morserino.Morserino_list()
 	},
 }

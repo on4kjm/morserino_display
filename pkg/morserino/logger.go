@@ -1,5 +1,13 @@
 package morserino
 
+import (
+	"os"
+	"strings"
+	"time"
+
+	"github.com/rs/zerolog"
+)
+
 /*
 Copyright © 2021 Jean-Marc Meessen, ON4KJM <on4kjm@gmail.com>
 
@@ -22,38 +30,38 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-import (
-	"bufio"
-	"fmt"
-	"log"
-	"os"
-)
+var AppLogger zerolog.Logger
 
-// Main entry point for console output
-func Morserino_console(morserinoPortName string) {
+// Configures the logging subsystem following the CLI parameter
+func SetupLogger(morserinoDebugLevel string, morserinoDebugFilename string) {
+	//is it set?
+	//if debugleve is set to trace, add the code line number
 
-	// initialize the structure containing all the channels we are going to use
-	channels := &MorserinoChannels{}
-	channels.Init()
-
-	// Setting up the EnumPorts to the "real life" implementation
-	var realEnumPorts EnumeratePorts
-
-	go OpenAndListen(morserinoPortName, realEnumPorts, channels)
-	go ConsoleDisplayListener(channels, bufio.NewWriter(os.Stdout))
-
-	<-channels.Done //Waiting here for everything to be orderly completed
 }
 
-//Main entry point for listing ports
-func Morserino_list() {
-	//We are going to use the real function to enumerate ports
-	var realEnumPorts EnumeratePorts
-
-	//Get the pretty printed list of devices
-	output, err := List_com(realEnumPorts)
-	if err != nil {
-		log.Fatal(err)
+//Creates or opens the logger file
+func getLoggerFileHandle(morserinoDebugFilename string) (*os.File, error) {
+	//if "stdout", direct the logger output to it
+	if strings.ToLower(morserinoDebugFilename) == "stdout" {
+		// tempFile, err := ioutil.TempFile(os.TempDir(),"deleteme")
+		return os.Stdout, nil
 	}
-	fmt.Println(output)
+
+	//if "", create a filename
+	if morserinoDebugFilename == "" {
+		morserinoDebugFilename = createUniqueFilename()
+	}
+
+	//if a filename is specified create or append to the file
+	return os.OpenFile(morserinoDebugFilename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+
+}
+
+//Generates a file name on the format "morserinoTrace_yyyymmddhhmmss.log"
+func createUniqueFilename() string {
+	//get current time
+	dt := time.Now()
+
+	time := dt.Format("20060102150405")
+	return "morserinoTrace_" + time + ".log"
 }
