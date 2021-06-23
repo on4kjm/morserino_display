@@ -22,6 +22,9 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/on4kjm/morserino_display/pkg/morserino"
 	"github.com/spf13/cobra"
 )
@@ -29,21 +32,22 @@ import (
 // consoleCmd represents the console command
 var consoleCmd = &cobra.Command{
 	Use:   "console",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Displays the Morserino output to the console",
 	Run: func(cmd *cobra.Command, args []string) {
-		morserino.SetupLogger(morserinoDebugLevel, morserinoDebugFilename)
+		err := morserino.SetupLogger(morserinoDebugLevel, morserinoDebugFilename)
+		if err != nil {
+			fmt.Println("\nERROR:  " + err.Error() + "\n")
+			cmd.Help()
+            os.Exit(1)
+		}
 		morserino.Morserino_console(morserinoPortName)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(consoleCmd)
+
+	//FIXME: the port parameter should be moved here
 
 	// Here you will define your flags and configuration settings.
 

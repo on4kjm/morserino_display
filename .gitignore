@@ -3,3 +3,4 @@ dist/*
 notes/help.txt
 cover.out
 coverage.txt
+*.log

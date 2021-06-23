@@ -2,15 +2,95 @@ package morserino
 
 import (
 	"bufio"
+	"io/ioutil"
 	"os"
 	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tidwall/gjson"
 )
 
-func TestSetupLogger(t *testing.T) {
+func TestSetupLogger_noLevel(t *testing.T) {
+	// ** Given
+	debugLevel := ""
+
+	// ** When
+	err := SetupLogger(debugLevel, "")
+
+	// ** Then
+	assert.NoError(t, err)
+}
+
+func TestSetupLogger_badLevel(t *testing.T) {
+	// ** Given
+	debugLevel := "blaahhh"
+
+	// ** When
+	err := SetupLogger(debugLevel, "")
+
+	// ** Then
+	assert.EqualError(t, err, "\"blaahhh\" is not a supported trace level")
+}
+
+func TestSetupLogger_trace(t *testing.T) {
+	// ** Given
+	debugLevel := "trace"
+	logFilename := "setupLogger_test.log"
+	testMessage := "Test message"
+
+	// ** When
+	err := SetupLogger(debugLevel, logFilename)
+
+	// ** Then
+	assert.NoError(t, err)
+	AppLogger.Debug().Msg(testMessage)
+
+	//something should be written in the file
+	jsonData, err := ioutil.ReadFile(logFilename)
+	assert.NoError(t, err)
+
+	message := gjson.Get(string(jsonData[:]), "message")
+	assert.Equal(t, testMessage, message.String())
+
+	//As we requested the trace level, the caller field should be there
+	caller := gjson.Get(string(jsonData[:]), "caller")
+	assert.NotEmpty(t, caller.String())
+
+	// ** cleanup
+	err = os.Remove(logFilename)
+	require.NoError(t, err)
+
+}
+
+func TestSetupLogger_debug(t *testing.T) {
+	// ** Given
+	debugLevel := "debug"
+	logFilename := "setupLogger_debugTest.log"
+	testMessage := "Test message"
+
+	// ** When
+	err := SetupLogger(debugLevel, logFilename)
+
+	// ** Then
+	assert.NoError(t, err)
+	AppLogger.Debug().Msg(testMessage)
+
+	//something should be written in the file
+	jsonData, err := ioutil.ReadFile(logFilename)
+	assert.NoError(t, err)
+
+	message := gjson.Get(string(jsonData[:]), "message")
+	assert.Equal(t, testMessage, message.String())
+
+	//As we requested the trace level, the caller field should be there
+	caller := gjson.Get(string(jsonData[:]), "caller")
+	assert.Empty(t, caller.String())
+
+	// ** cleanup
+	err = os.Remove(logFilename)
+	require.NoError(t, err)
 
 }
 
@@ -55,15 +135,13 @@ func Test_getLoggerFileHandle_create(t *testing.T) {
 	err = w.Flush()
 	require.NoError(t, err)
 
-
 	// ** Then
 	assert.Equal(t, testLogName, logfile.Name())
 
 	//length should be zero as we just created it
 	fi, err := logfile.Stat()
 	require.NoError(t, err)
-	assert.Equal(t,int64(i),fi.Size())
-
+	assert.Equal(t, int64(i), fi.Size())
 
 	//cleanup
 	err = os.Remove(logfile.Name())

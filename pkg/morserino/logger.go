@@ -1,6 +1,7 @@
 package morserino
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -33,10 +34,38 @@ THE SOFTWARE.
 var AppLogger zerolog.Logger
 
 // Configures the logging subsystem following the CLI parameter
-func SetupLogger(morserinoDebugLevel string, morserinoDebugFilename string) {
-	//is it set?
-	//if debugleve is set to trace, add the code line number
+func SetupLogger(morserinoDebugLevel string, morserinoDebugFilename string) error {
 
+	debugLevel := strings.ToLower(morserinoDebugLevel)
+
+	//If no level was defined, we do nothing
+	if debugLevel == "" {
+		return nil
+	}
+
+	if (debugLevel != "trace") && (debugLevel != "info") && (debugLevel != "debug") {
+		return fmt.Errorf("\"%s\" is not a supported trace level", morserinoDebugLevel)
+	}
+
+	logFile, err := getLoggerFileHandle(morserinoDebugFilename)
+	if err != nil {
+		return err
+	}
+
+	zerolog.TimeFieldFormat = "15:04:05.000"
+	//if debuglevel is set to "trace", add the code line number
+	if debugLevel == "trace" {
+		AppLogger = zerolog.New(logFile).With().Timestamp().Caller().Logger()
+		zerolog.SetGlobalLevel(zerolog.TraceLevel)
+	} else {
+		AppLogger = zerolog.New(logFile).With().Timestamp().Logger()
+		if debugLevel == "debug" {
+			zerolog.SetGlobalLevel(zerolog.DebugLevel)
+		} else {
+			zerolog.SetGlobalLevel(zerolog.InfoLevel)
+		}
+	}
+	return nil
 }
 
 //Creates or opens the logger file
