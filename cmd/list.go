@@ -41,7 +41,7 @@ var listCmd = &cobra.Command{
 		if err != nil {
 			fmt.Println("\nERROR:  " + err.Error() + "\n")
 			cmd.Help()
-            os.Exit(1)
+			os.Exit(1)
 		}
 		morserino.Morserino_list()
 	},
