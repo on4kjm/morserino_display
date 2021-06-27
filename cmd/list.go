@@ -22,7 +22,10 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"github.com/on4kjm/morserino_display/pkg/morserino_core"
+	"fmt"
+	"os"
+
+	"github.com/on4kjm/morserino_display/pkg/morserino"
 
 	"github.com/spf13/cobra"
 )
@@ -34,7 +37,13 @@ var listCmd = &cobra.Command{
 	Long: `Displays the ports available on the system.
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		morserino_core.Morserino_list()
+		err := morserino.SetupLogger(morserinoDebugLevel, morserinoDebugFilename)
+		if err != nil {
+			fmt.Println("\nERROR:  " + err.Error() + "\n")
+			cmd.Help()
+			os.Exit(1)
+		}
+		morserino.Morserino_list()
 	},
 }
 

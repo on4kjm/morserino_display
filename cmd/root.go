@@ -37,6 +37,12 @@ var cfgFile string
 //Global variable with the port name
 var morserinoPortName string
 
+//Global variable with the debug level
+var morserinoDebugLevel string
+
+//Global variable with the name of the log file (if defined)
+var morserinoDebugFilename string
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "morserino_display",
@@ -51,7 +57,7 @@ For easy reading, a new line is inserted after a "=" sign.
 	// Run: func(cmd *cobra.Command, args []string) { },
 	// Run: func(cmd *cobra.Command, args []string) {
 	// 	//Displaying on console is de default behaviour
-	// 	morserino_com.ConsoleListen(morserinoPortName)
+	// 	morserino_com.Listen(morserinoPortName)
 	// },
 }
 
@@ -69,12 +75,11 @@ func init() {
 	// will be global for your application.
 
 	rootCmd.PersistentFlags().StringVar(&morserinoPortName, "port", "auto", "Morserino port (if set to \"auto\", will try to identify the port)")
+	rootCmd.PersistentFlags().StringVar(&morserinoDebugLevel, "debug", "", "Activtes debug tracing and its level (\"info\", \"debug\", \"trace\")")
+	rootCmd.PersistentFlags().StringVar(&morserinoDebugFilename, "logfile", "", "Specifices a specific filename to collect the debug info (\"stdout\" is a valid filename")
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.morserino_display.yaml)")
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 // initConfig reads in config file and ENV variables if set.

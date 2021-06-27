@@ -1,4 +1,4 @@
-package morserino_com
+package morserino
 
 /*
 Copyright © 2021 Jean-Marc Meessen, ON4KJM <on4kjm@gmail.com>
@@ -22,13 +22,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-import "go.bug.st/serial/enumerator"
+// Structure containing all the channels used by the application
+type MorserinoChannels struct {
+	// Channel for the data flow from serial port to display goroutines
+	MessageBuffer chan string
 
-type mockPortEnumerator struct {
-	ports []*enumerator.PortDetails
-	err   error
+	// Channel indicating that all data has been displayed and that the
+	// application can be closed
+	DisplayCompleted chan bool
+
+	Done chan bool
+
+	// Channel used to report back errors in goroutines
+	Error chan error
 }
 
-func (e mockPortEnumerator) GetDetailedPortsList() ([]*enumerator.PortDetails, error) {
-	return e.ports, e.err
+//Initialize the channels
+func (mc *MorserinoChannels) Init() {
+	mc.MessageBuffer = make(chan string, 10)
+	mc.DisplayCompleted = make(chan bool)
+	mc.Done = make(chan bool)
+	mc.Error = make(chan error, 10)
 }

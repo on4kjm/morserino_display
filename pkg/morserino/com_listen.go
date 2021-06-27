@@ -1,4 +1,4 @@
-package morserino_com
+package morserino
 
 /*
 Copyright © 2021 Jean-Marc Meessen, ON4KJM <on4kjm@gmail.com>
@@ -25,33 +25,41 @@ THE SOFTWARE.
 import (
 	"fmt"
 	"io"
-	"log"
 	"strings"
 	"testing/iotest"
 
-	"github.com/on4kjm/morserino_display/pkg/morserino_console"
+	// "github.com/rs/zerolog"
 	"go.bug.st/serial"
 )
 
+const exitString string = "\nExiting...\n"
+
 // Main listen function with display to the console
-func ConsoleListen(morserinoPortName string, genericEnumPorts comPortEnumerator) error {
+func OpenAndListen(morserinoPortName string, genericEnumPorts comPortEnumerator, channels *MorserinoChannels) {
 
 	//If requested, use the simulator instead of a real Morserino
 	if strings.HasPrefix("SIMULATOR", strings.ToUpper(morserinoPortName)) {
+		AppLogger.Debug().Msg("Simulator mode listener")
 		TestMessage := "cq cq de on4kjm on4kjm = tks fer call om = ur rst 599 = hw? \n73 de on4kjm = <sk> e e"
-		return Listen(iotest.OneByteReader(strings.NewReader(TestMessage)))
+		err := Listen(iotest.OneByteReader(strings.NewReader(TestMessage)), channels)
+		channels.Error <- err
+		return
 	}
 
 	//If portname "auto" was specified, we scan for the Morserino port
 	if strings.ToUpper(morserinoPortName) == "AUTO" {
+		AppLogger.Debug().Msg("Tying to detect the morsorino port")
 		portName, err := DetectDevice(genericEnumPorts)
+		channels.Error <- err
 		if err != nil {
-			return err
+			channels.MessageBuffer <- exitString
+			channels.Done <- true
+			return
 		}
 		morserinoPortName = portName
 	}
 
-	log.Println("Listening to port \"" + morserinoPortName + "\"")
+	AppLogger.Info().Msg("Listening to port \"" + morserinoPortName + "\"")
 
 	//Port parameters for a Morserino
 	mode := &serial.Mode{
@@ -61,20 +69,25 @@ func ConsoleListen(morserinoPortName string, genericEnumPorts comPortEnumerator)
 		StopBits: serial.OneStopBit,
 	}
 
+	AppLogger.Debug().Msg("Trying to open " + morserinoPortName)
 	p, err := serial.Open(morserinoPortName, mode)
 	if err != nil {
-		return err
+		AppLogger.Error().Err(err).Msg("Error opening port")
+		channels.Error <- err
+		return
 	}
 	defer p.Close()
 
-	return Listen(p)
+	err = Listen(p, channels)
+	channels.Error <- err
+	return
 }
 
 // Main receive loop
-func Listen(port io.Reader) error {
+func Listen(port io.Reader, channels *MorserinoChannels) error {
 
-	//TODO: needs to be moved as a goroutine
-	consoleDisplay := morserino_console.ConsoleDisplay{}
+	// //TODO: needs to be moved as a goroutine
+	// consoleDisplay := morserino_console.ConsoleDisplay{}
 
 	// variables for tracking the exit pattern
 	var (
@@ -88,7 +101,7 @@ func Listen(port io.Reader) error {
 		// Reads up to 100 bytes
 		n, err := port.Read(buff)
 		if err != nil {
-			log.Fatal(err)
+			AppLogger.Error().Err(err).Msg("Error reading on port")
 		}
 
 		// Check whether the "end of transmission" was sent
@@ -110,23 +123,40 @@ func Listen(port io.Reader) error {
 		}
 
 		if n == 0 {
-			fmt.Println("\nEOF")
+			AppLogger.Debug().Msg("EOF detectd")
+			AppLogger.Trace().Msg("Sending EOF to the console displayer")
+			channels.MessageBuffer <- "\nEOF"
+			//sending the exit marker to the diplay goroutine
+			AppLogger.Trace().Msg("Sending exit marker to the console displayer")
+			channels.MessageBuffer <- exitString
+			//waiting for it to complete (blocking read)
+			AppLogger.Debug().Msg("Waiting for the signal that the display processing was completed")
+			<-channels.DisplayCompleted
+			AppLogger.Debug().Msg("Display processing completed (received signal)")
 			break
 		}
 
-		// TODO: move this out and use a channel for that
-		consoleDisplay.Add(string(buff[:n]))
+		channels.MessageBuffer <- string(buff[:n])
 
 		if closeRequested {
-			consoleDisplay.Add("\nExiting...\n")
+			//sending the exit marker to the diplay goroutine
+			AppLogger.Trace().Msg("Sending exit marker to the console displayer as we received the exit sequence")
+			channels.MessageBuffer <- exitString
+			//waiting for it to complete (blocking read)
+			AppLogger.Debug().Msg("Waiting for the signal that the display processing was completed")
+			<-channels.DisplayCompleted
+			AppLogger.Debug().Msg("Display processing completed (received signal)")
 			break
 		}
 	}
+	AppLogger.Debug().Msg("Sending signal that all processing is done")
+	channels.Done <- true
 
+	AppLogger.Debug().Msg("Exiting Listen")
 	return nil
 }
 
-// Tries to auto detect the Morserino port
+// Tries to auto detect the Morserino port based on the USB Vendor and Device ID
 func DetectDevice(genericEnumPorts comPortEnumerator) (string, error) {
 	theComPortList, err := Get_com_list(genericEnumPorts)
 	if err != nil {

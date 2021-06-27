@@ -1,4 +1,4 @@
-package morserino_console
+package morserino
 
 /*
 Copyright © 2021 Jean-Marc Meessen, ON4KJM <on4kjm@gmail.com>
@@ -23,29 +23,37 @@ THE SOFTWARE.
 */
 
 import (
+	"bufio"
 	"fmt"
-	"strings"
+	"log"
+	"os"
 )
 
-//FIXME: Add comment
-type ConsoleDisplay struct {
-	currentLine string
-	newLine     string
+// Main entry point for console output
+func Morserino_console(morserinoPortName string) {
+
+	// initialize the structure containing all the channels we are going to use
+	channels := &MorserinoChannels{}
+	channels.Init()
+
+	// Setting up the EnumPorts to the "real life" implementation
+	var realEnumPorts EnumeratePorts
+
+	go OpenAndListen(morserinoPortName, realEnumPorts, channels)
+	go ConsoleDisplayListener(channels, bufio.NewWriter(os.Stdout))
+
+	<-channels.Done //Waiting here for everything to be orderly completed
 }
 
-func (cd *ConsoleDisplay) String() string {
-	//FIXME: add something useful here
-	return ""
-}
+//Main entry point for listing ports
+func Morserino_list() {
+	//We are going to use the real function to enumerate ports
+	var realEnumPorts EnumeratePorts
 
-func (cd *ConsoleDisplay) Add(buff string) {
-	if strings.Contains(buff, "=") {
-		//FIXME: is the buffer one char long
-		fmt.Println("=")
-	} else {
-		fmt.Printf("%s", buff)
+	//Get the pretty printed list of devices
+	output, err := List_com(realEnumPorts)
+	if err != nil {
+		log.Fatal(err)
 	}
+	fmt.Println(output)
 }
-
-//TODO: add break on column
-//TODO: Add tests

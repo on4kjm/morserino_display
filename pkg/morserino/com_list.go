@@ -1,4 +1,4 @@
-package morserino_com
+package morserino
 
 /*
 Copyright © 2021 Jean-Marc Meessen, ON4KJM <on4kjm@gmail.com>
