@@ -3,7 +3,6 @@ package morserino
 import (
 	"io"
 	"strings"
-	"testing/iotest"
 
 	"go.bug.st/serial"
 )
@@ -22,7 +21,7 @@ const simulatorMessage = "cq cq de on4kjm on4kjm = tks fer call om = ur rst 599 
 func Open(portName string) (io.ReadWriteCloser, error) {
 	switch strings.ToLower(portName) {
 	case "simulator":
-		return nopCloseWriter{iotest.OneByteReader(strings.NewReader(simulatorMessage))}, nil
+		return nopCloseWriter{DelayedOneByteReader(strings.NewReader(simulatorMessage))}, nil
 	default:
 		return serial.Open(portName, &defaultMode)
 	}
