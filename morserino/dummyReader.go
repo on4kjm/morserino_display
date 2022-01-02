@@ -19,6 +19,6 @@ func (r *delayedOneByteReader) Read(p []byte) (int, error) {
 	if len(p) == 0 {
 		return 0, nil
 	}
-	time.Sleep(1 * time.Second)
+	time.Sleep(250 * time.Millisecond)
 	return r.r.Read(p[0:1])
 }
