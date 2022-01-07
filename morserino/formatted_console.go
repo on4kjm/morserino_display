@@ -37,6 +37,7 @@ func (c *FormattedConsole) Run(ctx context.Context) error {
 			}
 
 			// Event handling logic
+			c.output.Write(evt.Payload)
 			// c.output.Write(evt.
 		}
 	}
