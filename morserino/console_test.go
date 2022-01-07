@@ -43,7 +43,7 @@ func TestConsole(t *testing.T){
 	})
 
 	// Let's now wait for completion of all of those goroutines, and complain in case of error.
-	if err := gr.Wait(); err != nil && !errors.Is(err, ErrListenDone) {
+	if err := gr.Wait(); err != nil && !errors.Is(err, ErrEmitterDone) {
 		t.Errorf("Received an unexpected error, exiting. err=%v", err)
 	}
 

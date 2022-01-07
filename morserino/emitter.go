@@ -13,22 +13,22 @@ import (
 const defaultReadSize = 100
 
 var (
-	ErrListenDone = errors.New("listener exited")
+	ErrEmitterDone = errors.New("listener exited")
 )
 
-// Listener reads on the given device, and pushes events to the given event Handler as soon as needed.
+// Emitter reads on the given device, and pushes events to the given event Handler as soon as needed.
 // It raises ErrListenDone as soon as it terminates.
-type Listener struct {
+type Emitter struct {
 	com io.ReadCloser
 
 	hdl EventHandler
 }
 
-func NewListener(com io.ReadCloser, handler EventHandler) *Listener {
-	return &Listener{com: com, hdl: handler}
+func NewEmitter(com io.ReadCloser, handler EventHandler) *Emitter {
+	return &Emitter{com: com, hdl: handler}
 }
 
-func (c *Listener) Listen(ctx context.Context) error {
+func (c *Emitter) Listen(ctx context.Context) error {
 	buf := make([]byte, defaultReadSize)
 
 	// A first goroutine is being used to track for context cancellation.
@@ -64,7 +64,7 @@ func (c *Listener) Listen(ctx context.Context) error {
 				// Though, that's not an error.
 				// It's part of our termination mechanism as stated above.
 				// Let's signal termination by returning ErrListenDone.
-				return ErrListenDone
+				return ErrEmitterDone
 			}
 
 			// Returns this error if it's not a PortClosed error.
@@ -74,7 +74,7 @@ func (c *Listener) Listen(ctx context.Context) error {
 		default:
 			// Let's not complain about EOF. It's means that our job is done but not an error.
 			if errors.Is(err, io.EOF) {
-				return ErrListenDone
+				return ErrEmitterDone
 			}
 
 			// Some unknown error happened, let's exit.
@@ -88,7 +88,7 @@ func (c *Listener) Listen(ctx context.Context) error {
 				log.Err(err).Msg("Failed to notify EOF")
 			}
 
-			return ErrListenDone
+			return ErrEmitterDone
 		}
 
 		if bytes.HasPrefix(buf, []byte("<sk> e e")) {
@@ -102,7 +102,7 @@ func (c *Listener) Listen(ctx context.Context) error {
 
 			log.Trace().Msg("Exiting listen loop")
 
-			return ErrListenDone
+			return ErrEmitterDone
 		}
 
 		if err := c.hdl.Handle(Event{Kind: KindMessage, Payload: buf[:n]}); err != nil {

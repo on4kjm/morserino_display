@@ -80,12 +80,12 @@ var consoleCmd = &cobra.Command{
 			// see https://pkg.go.dev/golang.org/x/sync/errgroup.
 			gr, gctx = errgroup.WithContext(cmd.Context())
 			console  = morserino.NewConsole()
-			listener = morserino.NewListener(dev, console)
+			emitter  = morserino.NewEmitter(dev, console)
 		)
 
 		// Let'snow start our listener goroutine, that will emit events as soon as it gets a meaningful message.
 		gr.Go(func() error {
-			return listener.Listen(gctx)
+			return emitter.Listen(gctx)
 		})
 
 		// To finish, let's start our console goroutine that will handle events coming from the user and from the listener.
@@ -94,7 +94,7 @@ var consoleCmd = &cobra.Command{
 		})
 
 		// Let's now wait for completion of all of those goroutines, and complain in case of error.
-		if err := gr.Wait(); err != nil && !errors.Is(err, morserino.ErrListenDone) {
+		if err := gr.Wait(); err != nil && !errors.Is(err, morserino.ErrEmitterDone) {
 			log.Err(err).Msg("Received an unexpected error, exiting")
 			return
 		}
